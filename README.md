@@ -1,58 +1,140 @@
-# OrchestrAI
+# AI Multi-Agent Creator Engine 🚀
 
-## Overview
+## 🧠 Visión
 
-OrchestrAI is a multi-agent orchestration engine designed to automate digital content pipelines and AI-driven avatar systems.
+Este repositorio documenta el diseño y desarrollo de una arquitectura multiagente orientada a la automatización de producción de contenido digital y creación de identidades virtuales escalables.
 
-This project focuses on building scalable infrastructure rather than a single AI persona.
+El objetivo no es construir un simple influencer IA, sino desarrollar un **motor técnico modular** capaz de:
 
-Core goals:
-
-- Modular agent orchestration
-- Structured prompt pipelines
-- Automated content workflows
-- Analytics-driven feedback loops
-- B2C experimental identity network
-- B2B digital avatar infrastructure
+* Orquestar agentes especializados.
+* Generar contenido coherente de forma autónoma.
+* Aprender de métricas reales mediante loops de feedback.
+* Servir como base para soluciones B2C (red propia de identidades IA) y B2B (avatares digitales para marcas).
 
 ---
 
-## Architecture Vision
+## 🎯 Objetivos del Proyecto
 
-The system is composed of specialized agents:
+### 1. Infraestructura Multiagente
 
-- Strategist Agent
-- Scriptwriter Agent
-- Media Generation Agent
-- Editing Agent
-- Publishing Agent
-- Analytics Agent
+Construir un sistema distribuido donde distintos agentes colaboren:
 
-All agents communicate using structured schemas.
-
----
-
-## Project Structure
-
-agents/
-orchestrator/
-core/
-prompts/
-schemas/
-docs/
-storage/
-
+* Strategist Agent → define dirección y narrativa.
+* Script Agent → genera estructura del contenido.
+* Media Agent → produce imagen/video/audio.
+* Editor Agent → adapta formato short-form.
+* Publishing Agent → automatiza distribución.
+* Analytics Agent → cierra el feedback loop.
 
 ---
 
-## Current Status
+### 2. Casos de Uso
 
-Concept and architecture design phase.
+#### 🔵 Red propia de identidades IA
+
+Laboratorio interno para validar pipelines, automatización y coherencia narrativa.
+
+#### 🟣 Avatares IA para marcas (B2B)
+
+Sistema que permite diseñar portavoces digitales coherentes con identidad corporativa y producción constante de anuncios.
 
 ---
 
-## EU AI Act Awareness
+### 3. Filosofía Técnica
 
-This project aims to promote transparent and responsible AI-generated content.
+Este proyecto NO busca reemplazar programadores.
 
-No deceptive synthetic identities or biometric misuse are intended.
+Busca redefinir el rol hacia:
+
+* Arquitectura de sistemas
+* Orquestación de agentes
+* Supervisión y evaluación continua
+
+El código generado por IA siempre será revisado dentro de pipelines estructurados.
+
+---
+
+## ⚙️ Arquitectura (alto nivel)
+
+Orquestador central:
+
+* n8n / API backend
+
+Flujo base:
+
+Trigger → Strategist → Script → Media → Editor → Publisher → Analytics → Feedback Loop
+
+Datos clave:
+
+* JSON estructurado entre agentes
+* Prompts versionados
+* Métricas persistentes
+
+---
+
+## 🗂️ Estructura Inicial del Proyecto
+
+```
+ai-multiagent-engine/
+│
+├── agents/
+│   ├── strategist/
+│   ├── scriptwriter/
+│   ├── media/
+│   ├── editor/
+│   └── analytics/
+│
+├── orchestrator/
+│   ├── workflows/
+│   └── n8n/
+│
+├── prompts/
+├── schemas/
+├── docs/
+└── README.md
+```
+
+---
+
+## 🧩 Roadmap Inicial
+
+### Fase 1 — Core System
+
+* Definición de agentes.
+* Pipeline básico guion → contenido.
+
+### Fase 2 — Multiagent Feedback
+
+* Métricas automatizadas.
+* Estrategia adaptativa.
+
+### Fase 3 — Producto B2B
+
+* Avatar Framework.
+* Guidelines de marca.
+
+---
+
+## 📌 Estado Actual
+
+Conceptualización y diseño de arquitectura.
+
+---
+
+## 🧱 Principios
+
+* Modularidad sobre complejidad.
+* Orquestación sobre automatización ciega.
+* Calidad narrativa sobre volumen.
+
+---
+
+## ⚠️ Nota Ética
+
+El sistema busca crear identidades digitales transparentes y responsables, evitando prácticas engañosas o manipulación de usuarios vulnerables.
+
+---
+
+## 👨‍💻 Autor
+
+Proyecto experimental orientado a investigación aplicada en sistemas multiagente y automatización creativa.
