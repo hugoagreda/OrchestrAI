@@ -1,56 +1,72 @@
-# AI Multi-Agent Creator Engine 🚀
+# OrchestrAI — Multi-Agent Identity & Automation Engine 🚀
 
 ## 🧠 Visión
 
-Este repositorio documenta el diseño y desarrollo de una arquitectura multiagente orientada a la automatización de producción de contenido digital y creación de identidades virtuales escalables.
+OrchestrAI es una infraestructura multiagente diseñada para orquestar modelos de inteligencia artificial, agentes especializados y pipelines automatizados con el objetivo de construir **entidades digitales personalizables** y sistemas autónomos adaptados a empresas.
 
-El objetivo no es construir un simple influencer IA, sino desarrollar un **motor técnico modular** capaz de:
+Este proyecto **no está enfocado únicamente a crear influencers o personajes**, sino a desarrollar un **motor técnico modular** capaz de:
 
-* Orquestar agentes especializados.
-* Generar contenido coherente de forma autónoma.
-* Aprender de métricas reales mediante loops de feedback.
-* Servir como base para soluciones B2C (red propia de identidades IA) y B2B (avatares digitales para marcas).
+- Orquestar múltiples agentes y modelos IA.
+- Construir identidades digitales desde cero (realistas, estilizadas o corporativas).
+- Automatizar flujos de contenido y comunicación.
+- Adaptarse a diferentes sectores empresariales mediante configuraciones personalizadas.
+- Servir como base para soluciones B2C (laboratorio propio) y B2B (infraestructura para empresas).
 
 ---
 
 ## 🎯 Objetivos del Proyecto
 
-### 1. Infraestructura Multiagente
+### 1️⃣ Infraestructura Multiagente
 
-Construir un sistema distribuido donde distintos agentes colaboren:
+Diseñar un sistema distribuido donde distintos agentes colaboren dentro de un flujo estructurado:
 
-* Strategist Agent → define dirección y narrativa.
-* Script Agent → genera estructura del contenido.
-* Media Agent → produce imagen/video/audio.
-* Editor Agent → adapta formato short-form.
-* Publishing Agent → automatiza distribución.
-* Analytics Agent → cierra el feedback loop.
+- **Strategist Agent** → define objetivos y narrativa.
+- **Behavior Agent** → interpreta directrices del usuario o empresa.
+- **Media Agent** → genera imagen, vídeo o audio.
+- **Editor Agent** → adapta formato y coherencia visual.
+- **Publishing Agent** → automatiza acciones y despliegue.
+- **Analytics Agent** → analiza métricas y alimenta el feedback loop.
 
----
-
-### 2. Casos de Uso
-
-#### 🔵 Red propia de identidades IA
-
-Laboratorio interno para validar pipelines, automatización y coherencia narrativa.
-
-#### 🟣 Avatares IA para marcas (B2B)
-
-Sistema que permite diseñar portavoces digitales coherentes con identidad corporativa y producción constante de anuncios.
+El sistema no impone un tipo de identidad específica: cada usuario o empresa define sus propias reglas.
 
 ---
 
-### 3. Filosofía Técnica
+### 2️⃣ Casos de Uso
 
-Este proyecto NO busca reemplazar programadores.
+#### 🔵 Laboratorio interno (B2C)
 
-Busca redefinir el rol hacia:
+Espacio experimental para validar:
 
-* Arquitectura de sistemas
-* Orquestación de agentes
-* Supervisión y evaluación continua
+- pipelines multiagente
+- coherencia narrativa
+- evolución de identidades digitales
 
-El código generado por IA siempre será revisado dentro de pipelines estructurados.
+Funciona como prueba pública del motor OrchestrAI.
+
+#### 🟣 Infraestructura empresarial (B2B)
+
+Sistema adaptable que permite a empresas:
+
+- diseñar entidades digitales personalizadas
+- definir comportamiento y objetivos
+- automatizar comunicación y contenido
+
+El foco no es solo marketing; el sistema busca adaptarse a múltiples industrias.
+
+---
+
+### 3️⃣ Filosofía Técnica
+
+OrchestrAI no pretende reemplazar programadores.
+
+Busca redefinir el rol técnico hacia:
+
+- Arquitectura de sistemas IA
+- Orquestación modular
+- Supervisión humana constante
+- Diseño responsable de identidades digitales
+
+Todo output generado por IA debe pasar por pipelines estructurados y revisables.
 
 ---
 
@@ -58,83 +74,6 @@ El código generado por IA siempre será revisado dentro de pipelines estructura
 
 Orquestador central:
 
-* n8n / API backend
+- n8n + API backend modular
 
 Flujo base:
-
-Trigger → Strategist → Script → Media → Editor → Publisher → Analytics → Feedback Loop
-
-Datos clave:
-
-* JSON estructurado entre agentes
-* Prompts versionados
-* Métricas persistentes
-
----
-
-## 🗂️ Estructura Inicial del Proyecto
-
-```
-ai-multiagent-engine/
-│
-├── agents/
-│   ├── strategist/
-│   ├── scriptwriter/
-│   ├── media/
-│   ├── editor/
-│   └── analytics/
-│
-├── orchestrator/
-│   ├── workflows/
-│   └── n8n/
-│
-├── prompts/
-├── schemas/
-├── docs/
-└── README.md
-```
-
----
-
-## 🧩 Roadmap Inicial
-
-### Fase 1 — Core System
-
-* Definición de agentes.
-* Pipeline básico guion → contenido.
-
-### Fase 2 — Multiagent Feedback
-
-* Métricas automatizadas.
-* Estrategia adaptativa.
-
-### Fase 3 — Producto B2B
-
-* Avatar Framework.
-* Guidelines de marca.
-
----
-
-## 📌 Estado Actual
-
-Conceptualización y diseño de arquitectura.
-
----
-
-## 🧱 Principios
-
-* Modularidad sobre complejidad.
-* Orquestación sobre automatización ciega.
-* Calidad narrativa sobre volumen.
-
----
-
-## ⚠️ Nota Ética
-
-El sistema busca crear identidades digitales transparentes y responsables, evitando prácticas engañosas o manipulación de usuarios vulnerables.
-
----
-
-## 👨‍💻 Autor
-
-Proyecto experimental orientado a investigación aplicada en sistemas multiagente y automatización creativa.
