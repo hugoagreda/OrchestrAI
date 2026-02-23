@@ -20,6 +20,44 @@ Agents are internal runtime components, not end-user concepts.
 
 ---
 
+## 📍 Current Development Phase
+
+OrchestrAI is currently in the **Core Runtime Stabilization Phase**.
+
+The foundational architecture of the Digital Entity Operating Layer has been implemented and validated through sequential execution.
+
+### ✅ Implemented Systems
+
+- Entity Templates (YAML presets)
+- EntityBuilder
+- IdentityEngine
+- BehaviorEngine
+- EntityRuntime
+- PlannerLayer
+- WorkflowEngine
+- ExecutionLayer (sequential)
+- ExecutionContext (shared runtime state)
+- ScriptAgent (initial execution integration)
+
+Current execution flow:
+
+Entity → Runtime → Planning → Workflow → Execution → Context
+
+This phase focuses on **stabilizing internal architecture before introducing full LLM providers or parallel multi-agent orchestration**.
+
+---
+
+### ⛔ Out of Scope (for this phase)
+
+- Parallel agent orchestration
+- Complex memory systems
+- UI/Product Layer design
+- Provider-specific implementations tightly coupled to agents
+
+These will be introduced in later phases once runtime stability is confirmed.
+
+---
+
 ## 🎯 Main Objectives
 
 - Design scalable technical architecture.
@@ -98,3 +136,50 @@ When responding:
 OrchestrAI is:
 
 > A Digital Entity Operating Layer powered by Multi-Agent Orchestration.
+
+## 🗂️ Project Structure
+
+```text
+OrchestrAI/
+├── README.md
+├── requirements.txt
+├── agents/
+│   ├── analytics/
+│   ├── editor/
+│   ├── media/
+│   ├── scriptwriter/
+│   └── strategist/
+├── core/
+│   ├── config.py
+│   ├── pipeline.py
+│   ├── test_run.py
+│   ├── behavior_engine/
+│   │   └── behavior_engine.py
+│   ├── entity_engine/
+│   │   ├── entity_builder.py
+│   │   └── entity_runtime.py
+│   ├── execu/
+│   ├── execution_layer/
+│   │   ├── execution_context.py
+│   │   └── execution_layer.py
+│   ├── identity_engine/
+│   │   └── identity_engine.py
+│   ├── planner_layer/
+│   │   └── planner_layer.py
+│   └── workflow_engine/
+│       └── workflow_engine.py
+├── orchestrator/
+│   ├── n8n/
+│   └── workflows/
+├── presets/
+│   └── entity_templates/
+│       └── human_ai_creator.yaml
+├── prompts/
+│   └── system_architect.md
+├── schemas/
+│   ├── content_schema.json
+│   └── entity_schema.json
+└── storage/
+    ├── assets/
+    └── metrics/
+```

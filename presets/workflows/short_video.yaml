@@ -1,0 +1,11 @@
+platform: tiktok
+
+steps:
+  - name: generate_script
+    role: scriptwriter
+
+  - name: generate_media
+    role: media
+
+  - name: prepare_publish
+    role: strategist

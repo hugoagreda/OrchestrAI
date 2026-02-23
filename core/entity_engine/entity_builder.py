@@ -1,22 +1,20 @@
 # OrchestrAI - Entity Builder v1
-# Responsible for loading entity templates and generating entity configurations.
+# Loads entity templates and builds base entity definitions.
 
 from pathlib import Path
-import json
 import yaml
 
 
 class EntityBuilder:
     """
-    EntityBuilder loads entity templates and prepares
-    structured entity configurations for the runtime engine.
+    Loads entity templates and prepares entity definitions.
     """
 
     def __init__(self, templates_path="presets/entity_templates"):
         self.templates_path = Path(templates_path)
 
     # -------------------------
-    # Load YAML Template
+    # Load Template
     # -------------------------
     def load_template(self, template_id: str) -> dict:
         template_file = self.templates_path / f"{template_id}.yaml"
@@ -25,29 +23,21 @@ class EntityBuilder:
             raise FileNotFoundError(f"Template not found: {template_file}")
 
         with open(template_file, "r", encoding="utf-8") as f:
-            template_data = yaml.safe_load(f)
-
-        return template_data
+            return yaml.safe_load(f)
 
     # -------------------------
-    # Build Entity Instance
+    # Build Entity
     # -------------------------
     def build_entity(self, template_id: str, overrides: dict | None = None) -> dict:
-        """
-        Creates a new entity configuration based on a template
-        and optional override parameters.
-        """
-
         entity = self.load_template(template_id)
 
-        # Apply overrides (empresa o usuario)
         if overrides:
             entity = self._merge_dicts(entity, overrides)
 
         return entity
 
     # -------------------------
-    # Helper: Deep Merge
+    # Deep Merge Helper
     # -------------------------
     def _merge_dicts(self, base: dict, updates: dict) -> dict:
         for key, value in updates.items():
@@ -58,11 +48,8 @@ class EntityBuilder:
         return base
 
 
-# -------------------------
-# Simple test run
-# -------------------------
+# Manual test
 if __name__ == "__main__":
     builder = EntityBuilder()
     entity = builder.build_entity("human_ai_creator")
-
-    print(json.dumps(entity, indent=2))
+    print(entity)

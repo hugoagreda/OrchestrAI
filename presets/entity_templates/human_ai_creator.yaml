@@ -22,6 +22,8 @@ identity:
 # -----------------------
 behavior:
   primary_goal: "create_engaging_content"
+  content_format: short_video
+  platform: tiktok
   secondary_goals:
     - build_brand_presence
     - drive_engagement

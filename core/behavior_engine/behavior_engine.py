@@ -1,44 +1,46 @@
-# OrchestrAI - Identity Engine v1
-# Responsible for interpreting identity configuration
-# and preparing runtime identity data.
+# OrchestrAI - Behavior Engine v1
+# Responsible for interpreting entity behavior configuration.
 
 
-class IdentityEngine:
+class BehaviorEngine:
     """
-    Interprets the identity layer of an entity definition
-    and converts it into a runtime-ready structure.
+    Converts entity behavior configuration into runtime behavior rules.
     """
 
     def __init__(self):
         pass
 
     # -------------------------
-    # Extract Identity
+    # Extract Behavior
     # -------------------------
-    def extract_identity(self, entity: dict) -> dict:
-        if "identity" not in entity:
-            raise ValueError("Entity has no identity layer.")
-        return entity["identity"]
+    def extract_behavior(self, entity: dict) -> dict:
+        if "behavior" not in entity:
+            raise ValueError("Entity has no behavior layer.")
+        return entity["behavior"]
 
     # -------------------------
-    # Normalize Identity
+    # Normalize Behavior
     # -------------------------
-    def normalize_identity(self, identity: dict) -> dict:
-        normalized = {
-            "style": identity.get("style", "realistic"),
-            "persona_name": identity.get("persona_name", "Unnamed Entity"),
-            "archetype": identity.get("archetype", "generic_creator"),
-            "visual_profile": identity.get("visual_profile", {}),
-            "voice": identity.get("voice", {}),
-        }
+    def normalize_behavior(self, behavior: dict) -> dict:
+
+    # 🔥 Copia completa del behavior original
+        normalized = dict(behavior)
+
+    # Solo aseguramos defaults, sin borrar nada
+        normalized.setdefault("primary_goal", "undefined")
+        normalized.setdefault("secondary_goals", [])
+        normalized.setdefault("autonomy_level", "low")
+        normalized.setdefault("allowed_actions", [])
+        normalized.setdefault("restricted_actions", [])
+
         return normalized
 
     # -------------------------
-    # Build Runtime Identity
+    # Build Runtime Behavior
     # -------------------------
-    def build_runtime_identity(self, entity: dict) -> dict:
-        identity = self.extract_identity(entity)
-        return self.normalize_identity(identity)
+    def build_runtime_behavior(self, entity: dict) -> dict:
+        behavior = self.extract_behavior(entity)
+        return self.normalize_behavior(behavior)
 
 
 # Manual test
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     from core.entity_engine.entity_builder import EntityBuilder
 
     builder = EntityBuilder()
-    engine = IdentityEngine()
+    engine = BehaviorEngine()
 
     entity = builder.build_entity("human_ai_creator")
-    print(engine.build_runtime_identity(entity))
+    print(engine.build_runtime_behavior(entity))
