@@ -50,13 +50,17 @@ class WorkflowEngine:
     # -------------------------------------------------
     def build_workflow(self, intent: dict) -> dict:
 
+        # -------------------------------------------------
         # 🔥 Intent → Strategy
+        # -------------------------------------------------
         strategy_id = self._resolve_strategy(intent)
-
+    
         workflow_data = self._load_workflow(strategy_id)
-
+    
         profile = self._resolve_profile(intent)
-
+    
+        workflow_profile = intent.get("workflow_profile", {})
+    
         # -------------------------------------------------
         # Strategy Profile selection
         # -------------------------------------------------
@@ -67,57 +71,79 @@ class WorkflowEngine:
             )
         else:
             workflow = dict(workflow_data)
-
+    
         # -------------------------------------------------
         # 🔥 Behavior-aware step filtering (PRE-RUNTIME)
         # -------------------------------------------------
         allowed = intent.get("allowed_actions", [])
         restricted = intent.get("restricted_actions", [])
         restricted_caps = intent.get("restricted_capabilities", [])
-
+    
         if "steps" in workflow:
-
+        
             filtered_steps = []
-
+    
             for step in workflow["steps"]:
                 step_name = step.get("name")
                 step_role = step.get("role")
-
+    
                 capability = f"{step_role}.{step_name}" if step_role else step_name
-            
-                # Skip restricted
+    
+                # Skip restricted actions
                 if step_name in restricted:
                     continue
-
-                # If allowed list exists → must be inside
+                
+                # Allowed list → whitelist
                 if allowed and step_name not in allowed:
                     continue
-
+                
+                # 🔥 Namespace filtering (FIXED)
                 blocked = False
                 for rule in restricted_caps:
-                    if capability.endswith("*"):
-                        if capability.startswith(rule[:-2]):
+                
+                    # rule example: "media.*"
+                    if rule.endswith("*"):
+                        namespace = rule[:-2]
+                        if capability.startswith(namespace):
                             blocked = True
                             break
-
+                        
                     elif rule == capability:
                         blocked = True
                         break
-
+                    
                 if blocked:
                     continue
-
+                
                 filtered_steps.append(step)
-
+    
             workflow["steps"] = filtered_steps
-
+    
+        # -------------------------------------------------
+        # 🔥 Strategy Workflow Posture (Entity OS Layer)
+        # -------------------------------------------------
+        if workflow_profile:
+        
+            # publishing optional → remove prepare_publish
+            if workflow_profile.get("publishing") == "optional":
+            
+                if "steps" in workflow:
+                    workflow["steps"] = [
+                        step for step in workflow["steps"]
+                        if step.get("name") != "prepare_publish"
+                    ]
+    
+            # analytics posture (future-ready flag)
+            if workflow_profile.get("analytics_feedback") == "enabled":
+                workflow["analytics_enabled"] = True
+    
         # -------------------------------------------------
         # Inject Intent Metadata (non-destructive)
         # -------------------------------------------------
         if intent.get("platform"):
             workflow["platform"] = intent["platform"]
-
+    
         if intent.get("autonomy"):
             workflow["autonomy"] = intent["autonomy"]
-
+    
         return workflow

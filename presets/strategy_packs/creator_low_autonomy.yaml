@@ -1,0 +1,24 @@
+id: creator_low_autonomy
+
+description: >
+  Strategy profile for content creators with limited autonomy.
+  Focused on script generation while restricting heavy media execution.
+
+# Intent modifiers (NO execution logic)
+intent_modifiers:
+
+  autonomy: low
+
+  # capability posture
+  restricted_capabilities:
+    - media.*
+
+  # allowed steps posture
+  allowed_actions:
+    - generate_script
+    - prepare_publish
+
+# Workflow posture
+workflow_profile_defaults:
+  publishing: optional
+  analytics_feedback: enabled

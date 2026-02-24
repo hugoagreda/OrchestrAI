@@ -31,14 +31,7 @@ class EntityRuntime:
             "entity_type": entity.get("entity_type"),
             "identity": runtime_identity,
             "behavior": runtime_behavior,
+            "strategy_pack": entity.get("strategy_pack"),
         }
 
         return runtime_entity
-
-
-# Manual test
-if __name__ == "__main__":
-    runtime = EntityRuntime()
-    entity_runtime = runtime.create_runtime("human_ai_creator")
-
-    print(entity_runtime)

@@ -22,6 +22,35 @@ OrchestrAI focuses on structured orchestration, not conversational AI products.
 
 ---
 
+## 🎯 Long-Term Vision — Digital Entity Personalization
+
+The long-term objective of OrchestrAI is to enable deep, structured customization of Digital Entities through layered configuration — not through ad-hoc prompt engineering or conversational agent tweaking.
+
+OrchestrAI is designed so that users can progressively shape how a Digital Entity operates by controlling:
+
+- Identity (presentation and expression)
+- Behavior (constraints and operational intent)
+- Strategy (execution posture and orchestration policies)
+- Workflow Profiles (structural execution preferences)
+- Capability Posture (what the entity is allowed to do)
+
+The goal is NOT to let users “build agents” through personality prompts.
+
+The goal is to allow users to **architect Digital Entities as configurable operating units** inside a Digital Entity Operating System.
+
+Entity customization must remain:
+
+- structured
+- declarative
+- modular
+- execution-agnostic
+
+All architectural evolution should move toward enabling deeper entity personalization while preserving strict separation between:
+
+Identity → Behavior → Strategy → Workflow → Execution.
+
+---
+
 ## 📍 Current Development Phase
 
 OrchestrAI has moved beyond pure runtime stabilization and is now entering the:
@@ -51,18 +80,25 @@ A new layer is emerging above runtime:
 - PlannerLayer (intent-based generation)
 - IntentStep (structured execution intent)
 
-### Strategy Layer (NEW)
+### Strategy Layer (Entity OS Core)
 
 - StrategyEngine
-- Strategy Profiles derived from entity workflow_profile
-- Intent adaptation based on entity configuration
+- Strategy Packs (Entity OS Profiles)
+- Intent Modifiers (execution posture adaptation)
+- Workflow Profile Defaults (OS-level posture inheritance)
+- Capability Posture Policies (namespace-level restrictions)
+
+Strategy Packs act as reusable Entity OS Profiles that define operational posture without modifying execution logic.
 
 ### Workflow Layer
 
 - WorkflowEngine
 - Strategy Profile Resolver
 - Behavior-aware workflow filtering
-- Capability namespace constraints
+- Capability Namespace Filtering
+- Strategy Workflow Posture (publishing / analytics / media policies)
+
+WorkflowEngine translates intent into declarative execution structures while respecting Strategy Layer posture policies.
 
 ### Execution Layer
 
@@ -76,12 +112,14 @@ A new layer is emerging above runtime:
 ## 🔁 Current Execution Flow
 
 
-Entity → Runtime → Planner → BehaviorEngine → StrategyEngine → WorkflowEngine → Execution → Context
+Entity → EntityRuntime → Planner → StrategyEngine → WorkflowEngine → Execution → Context
+
+StrategyEngine now injects Entity OS posture into intent before workflow translation, ensuring execution remains capability-driven and execution-agnostic.
 
 
 ExecutionLayer acts as a **pure dispatcher**.
 
-StrategyEngine governs execution intent **without touching runtime**.
+StrategyEngine governs execution posture through intent metadata without interacting with execution handlers or runtime dispatch logic.
 
 ---
 
@@ -223,6 +261,23 @@ ExecutionLayer must remain execution-agnostic.
 
 ---
 
+---
+
+## 🧠 Entity OS Design Principles (NEW)
+
+OrchestrAI is evolving toward an Entity Operating System model.
+
+Key principles:
+
+- Strategy Packs define execution posture, not behavior logic.
+- Workflow Profiles may be inherited from Strategy Packs and overridden by entities.
+- Capability access is governed through namespace policies rather than direct handler control.
+- ExecutionLayer remains a pure kernel — unaware of identity, behavior, or strategy layers.
+- Entity personalization occurs through layered configuration, not runtime mutation.
+
+Entity OS customization is declarative, deterministic, and system-governed.
+
+---
 ## 🔥 Strategic Direction
 
 OrchestrAI is evolving into:
@@ -252,6 +307,7 @@ core/action/
 ├── publishing/
 └── analytics/
 
+Capability Namespaces will evolve into first-class OS policies, enabling large-scale capability governance without coupling execution logic to entity configuration.
 
 ### 3️⃣ Structured RuntimeStep Schema
 
