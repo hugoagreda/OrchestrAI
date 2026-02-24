@@ -21,22 +21,30 @@ identity:
 # BEHAVIOR LAYER
 # -----------------------
 behavior:
-  primary_goal: "create_engaging_content"
+  primary_goal: create_engaging_content
   content_format: short_video
   platform: tiktok
+
   secondary_goals:
     - build_brand_presence
     - drive_engagement
-  autonomy_level: medium
 
+  autonomy_level: low
+
+  # 🔥 IMPORTANTE:
+  # allowed_actions ahora debe mapear a step.name
   allowed_actions:
-    - generate_content
-    - analyze_metrics
-    - adapt_tone
+    - generate_script
+    - prepare_publish
 
+  # restricted_actions sigue funcionando
   restricted_actions:
     - impersonate_real_person
     - generate_misleading_identity
+
+  # 🔥 NUEVO NIVEL (namespace filtering)
+  restricted_capabilities:
+    - media.*
 
 # -----------------------
 # CONTENT PROFILE

@@ -1,11 +1,15 @@
-platform: tiktok
+strategies:
 
-steps:
-  - name: generate_script
-    role: scriptwriter
+  default:
+    steps:
+      - name: generate_script
+        role: scriptwriter
+      - name: generate_media
+        role: media
+      - name: prepare_publish
+        role: strategist
 
-  - name: generate_media
-    role: media
-
-  - name: prepare_publish
-    role: strategist
+  low_autonomy:
+    steps:
+      - name: generate_script
+        role: scriptwriter

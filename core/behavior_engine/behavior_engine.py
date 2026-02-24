@@ -1,32 +1,29 @@
-# OrchestrAI - Behavior Engine v1
-# Responsible for interpreting entity behavior configuration.
+# Responsible for interpreting entity behavior configuration
+# and enriching IntentStep without executing logic.
 
 
 class BehaviorEngine:
-    """
-    Converts entity behavior configuration into runtime behavior rules.
-    """
 
     def __init__(self):
         pass
 
-    # -------------------------
+    # -------------------------------------------------
     # Extract Behavior
-    # -------------------------
+    # -------------------------------------------------
     def extract_behavior(self, entity: dict) -> dict:
         if "behavior" not in entity:
             raise ValueError("Entity has no behavior layer.")
         return entity["behavior"]
 
-    # -------------------------
-    # Normalize Behavior
-    # -------------------------
+    # -------------------------------------------------
+    # Normalize Behavior (non-destructive)
+    # -------------------------------------------------
     def normalize_behavior(self, behavior: dict) -> dict:
 
-    # 🔥 Copia completa del behavior original
+        # 🔥 Copia completa del behavior original
         normalized = dict(behavior)
 
-    # Solo aseguramos defaults, sin borrar nada
+        # Solo aseguramos defaults, sin borrar nada
         normalized.setdefault("primary_goal", "undefined")
         normalized.setdefault("secondary_goals", [])
         normalized.setdefault("autonomy_level", "low")
@@ -35,20 +32,32 @@ class BehaviorEngine:
 
         return normalized
 
-    # -------------------------
+    # -------------------------------------------------
     # Build Runtime Behavior
-    # -------------------------
+    # -------------------------------------------------
     def build_runtime_behavior(self, entity: dict) -> dict:
         behavior = self.extract_behavior(entity)
         return self.normalize_behavior(behavior)
 
+    # -------------------------------------------------
+    # 🔥 NEW — Adapt IntentStep (Planner → Behavior Bridge)
+    # -------------------------------------------------
+    def adapt_intent(self, intent_step, runtime_entity: dict):
+   
+        behavior = runtime_entity.get("behavior", {})
 
-# Manual test
-if __name__ == "__main__":
-    from core.entity_engine.entity_builder import EntityBuilder
+        # Convertimos a dict para modificar sin romper estructura
+        intent_data = intent_step.to_dict()
 
-    builder = EntityBuilder()
-    engine = BehaviorEngine()
+        # Ejemplo simple (no hardcodear lógica compleja aún)
+        autonomy = behavior.get("autonomy_level", "medium")
 
-    entity = builder.build_entity("human_ai_creator")
-    print(engine.build_runtime_behavior(entity))
+        # Añadimos metadata futura
+        intent_data["autonomy"] = autonomy
+
+        intent_data["allowed_actions"] = behavior.get("allowed_actions", [])
+        intent_data["restricted_actions"] = behavior.get("restricted_actions", [])
+        intent_data["restricted_capabilities"] = behavior.get("restricted_capabilities", [])
+
+        # 🔥 Devolvemos nuevo IntentStep (inmutable conceptualmente)
+        return intent_step.__class__(intent_data)

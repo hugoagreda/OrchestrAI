@@ -1,6 +1,7 @@
-# OrchestrAI - Planner Layer v2
 # Responsible for interpreting runtime entity configuration
-# and generating a structured high-level action plan.
+# and generating a structured high-level action plan (IntentStep).
+
+from core.planner_layer.intent_step import IntentStep
 
 
 class PlannerLayer:
@@ -12,10 +13,10 @@ class PlannerLayer:
     def __init__(self):
         pass
 
-    # -------------------------
-    # Generate Action Plan
-    # -------------------------
-    def generate_plan(self, runtime_entity: dict) -> dict:
+    # -------------------------------------------------
+    # Generate Action Plan (IntentStep)
+    # -------------------------------------------------
+    def generate_plan(self, runtime_entity: dict) -> IntentStep:
 
         identity = runtime_entity.get("identity", {})
         behavior = runtime_entity.get("behavior", {})
@@ -38,7 +39,7 @@ class PlannerLayer:
         # -------------------------------------------------
         # Structured Action Plan (INTENT, not EXECUTION)
         # -------------------------------------------------
-        plan = {
+        plan_data = {
             "objective": primary_goal,
             "content_type": content_type,
             "platform": platform,
@@ -46,12 +47,13 @@ class PlannerLayer:
             "visual_style": style,
         }
 
-        return plan
+        # 🔥 DEVUELVE IntentStep (ya no dict crudo)
+        return IntentStep(plan_data)
 
 
-# -------------------------
+# -------------------------------------------------
 # Manual test
-# -------------------------
+# -------------------------------------------------
 if __name__ == "__main__":
     from core.entity_engine.entity_runtime import EntityRuntime
 
@@ -62,4 +64,5 @@ if __name__ == "__main__":
 
     action_plan = planner.generate_plan(runtime_entity)
 
-    print(action_plan)
+    # 👇 ahora es objeto, no dict
+    print(action_plan.to_dict())

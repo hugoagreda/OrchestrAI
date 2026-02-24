@@ -1,6 +1,3 @@
-# OrchestrAI - Action Registry
-# Auto-discovers action handlers inside core/action/
-
 import importlib
 import pkgutil
 import core.action
@@ -22,6 +19,12 @@ def discover_actions():
             fn = getattr(module, attr)
 
             if callable(fn) and not attr.startswith("_"):
+
+                # ✔️ registro clásico (backward compatible)
                 registry[attr] = fn
+
+                # 🔥 nuevo registro por namespace
+                capability_key = f"{module_name}.{attr}"
+                registry[capability_key] = fn
 
     return registry
