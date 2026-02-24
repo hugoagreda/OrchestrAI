@@ -267,51 +267,68 @@ Preparation for future orchestration analytics.
 OrchestrAI/
 ├── README.md
 ├── requirements.txt
+|
 ├── agents/
 │   ├── analytics/
 │   ├── editor/
 │   ├── media/
 │   ├── scriptwriter/
 │   └── strategist/
+│
 ├── core/
 │   ├── config.py
 │   ├── pipeline.py
 │   ├── test_run.py
+│   │
 │   ├── action/
 │   │   ├── __init__.py
 │   │   ├── action_registry.py
 │   │   ├── media_action.py
 │   │   ├── publish_action.py
 │   │   └── script_action.py
+│   │
 │   ├── behavior_engine/
 │   │   └── behavior_engine.py
+│   │
 │   ├── entity_engine/
 │   │   ├── entity_builder.py
-│   │   └── entity_runtime.py
+│   │   ├── entity_runtime.py
+│   │
 │   ├── execution_layer/
 │   │   ├── execution_context.py
-│   │   └── execution_layer.py
+│   │   ├── execution_layer.py
+│   │   └──runtime_step.py
+│   │
 │   ├── identity_engine/
 │   │   └── identity_engine.py
+│   │
 │   ├── planner_layer/
+│   │   ├── intent_step.py
 │   │   └── planner_layer.py
+│   │
 │   └── workflow_engine/
 │       └── workflow_engine.py
+│
 ├── orchestrator/
 │   ├── n8n/
 │   └── workflows/
+│
 ├── presets/
 │   ├── entity_templates/
 │   │   └── human_ai_creator.yaml
+│
 │   └── workflows/
 │       ├── generic.yaml
 │       └── short_video.yaml
+│
 ├── prompts/
 │   └── system_architect.md
+│
 ├── schemas/
 │   ├── content_schema.json
 │   ├── entity_schema.json
 │   └── step_schema.json
+│
 └── storage/
   ├── assets/
   └── metrics/
