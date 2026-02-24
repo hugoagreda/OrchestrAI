@@ -111,7 +111,6 @@ WorkflowEngine translates intent into declarative execution structures while res
 
 ## 🔁 Current Execution Flow
 
-
 Entity → EntityRuntime → Planner → StrategyEngine → WorkflowEngine → Execution → Context
 
 StrategyEngine now injects Entity OS posture into intent before workflow translation, ensuring execution remains capability-driven and execution-agnostic.
@@ -337,23 +336,23 @@ OrchestrAI/
 │   ├── test_run.py
 │   │
 │   ├── action/
-│   │   ├── __init__.py
 │   │   ├── action_registry.py
 │   │   ├── media_action.py
 │   │   ├── publish_action.py
-│   │   └── script_action.py
+│   │   ├── script_action.py
+│   │   └── __init__.py
 │   │
 │   ├── behavior_engine/
 │   │   └── behavior_engine.py
 │   │
 │   ├── entity_engine/
 │   │   ├── entity_builder.py
-│   │   ├── entity_runtime.py
+│   │   └── entity_runtime.py
 │   │
 │   ├── execution_layer/
 │   │   ├── execution_context.py
 │   │   ├── execution_layer.py
-│   │   └──runtime_step.py
+│   │   └── runtime_step.py
 │   │
 │   ├── identity_engine/
 │   │   └── identity_engine.py
@@ -361,6 +360,9 @@ OrchestrAI/
 │   ├── planner_layer/
 │   │   ├── intent_step.py
 │   │   └── planner_layer.py
+│   │
+│   ├── strategy_engine/
+│   │   └── strategy_engine.py
 │   │
 │   └── workflow_engine/
 │       └── workflow_engine.py
@@ -372,7 +374,10 @@ OrchestrAI/
 ├── presets/
 │   ├── entity_templates/
 │   │   └── human_ai_creator.yaml
-│
+│   │
+│   ├── strategy_packs/
+│   │   └── creator_low_autonomy.yaml
+│   │
 │   └── workflows/
 │       ├── generic.yaml
 │       └── short_video.yaml
