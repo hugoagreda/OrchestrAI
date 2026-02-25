@@ -108,7 +108,7 @@ def main():
     if "steps" in workflow:
         print("\n[WORKFLOW STEPS]")
         for i, step in enumerate(workflow["steps"], 1):
-            print(f"{i}. role={step.get('role')} | name={step.get('name')} | capability={step.get('capability')}")
+            print(f"{i}. capability={step.get('capability')} | action={step.get('action')}")
 
     # =====================================================
     # 6️⃣ EXECUTION LAYER

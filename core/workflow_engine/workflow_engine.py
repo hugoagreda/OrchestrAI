@@ -1,6 +1,7 @@
 from pathlib import Path
 import yaml
 
+
 class WorkflowEngine:
 
     def __init__(self, workflows_path="presets/workflows"):
@@ -10,6 +11,7 @@ class WorkflowEngine:
     # Load Workflow Preset
     # -------------------------------------------------
     def _load_workflow(self, workflow_id: str) -> dict:
+
         workflow_file = self.workflows_path / f"{workflow_id}.yaml"
 
         if not workflow_file.exists():
@@ -19,139 +21,105 @@ class WorkflowEngine:
             return yaml.safe_load(f)
 
     # -------------------------------------------------
-    # Build Workflow (OS Translator)
+    # Build Workflow (PURE TRANSLATOR)
     # -------------------------------------------------
-    
     def build_workflow(self, intent: dict) -> dict:
 
-        # -------------------------------------------------
-        # 🔥 Strategy already resolved by StrategyEngine
-        # -------------------------------------------------
         workflow_id = intent.get("content_type", "generic")
 
         workflow_data = self._load_workflow(workflow_id)
 
-        workflow_profile = intent.get("workflow_profile", {})
-
-        # -------------------------------------------------
-        # Strategy Profile selection (pure translation)
-        # -------------------------------------------------
-        profile = intent.get("workflow_profile", {}).get("profile", "default")
-
-        if "strategies" in workflow_data:
-            workflow = dict(
-                workflow_data["strategies"].get(profile)
-                or workflow_data["strategies"]["default"]
-            )
-        else:
-            workflow = dict(workflow_data)
-
-        # -------------------------------------------------
-        # 🔥 Behavior-aware step filtering (PRE-RUNTIME)
-        # -------------------------------------------------
         allowed = intent.get("allowed_actions", [])
         restricted = intent.get("restricted_actions", [])
         restricted_caps = intent.get("restricted_capabilities", [])
+        capability_map = intent.get("capability_map", {})
+
+        profile = "default"
+
+        if "strategies" in workflow_data:
+            workflow = dict(workflow_data["strategies"][profile])
+        else:
+            workflow = dict(workflow_data)
+
+        filtered_steps = []
 
         if "steps" in workflow:
 
-            filtered_steps = []
-
             for step in workflow["steps"]:
 
-                # -------------------------------------------------
-                # 🔥 Normalize FIRST (OS schema)
-                # -------------------------------------------------
-                if "name" in step:
-                    step["action"] = step.pop("name")
+                # -----------------------------------------
+                # 🔥 Normalize to OS-native schema
+                # -----------------------------------------
+                action = step.get("action") or step.get("name")
+                role = step.get("role")
 
-                role = step.pop("role", None)
+                if not action:
+                    continue
 
-                # -------------------------------------------------
-                # 🔥 Inject capability from Strategy
-                # -------------------------------------------------
-                capability_map = intent.get("capability_map", {})
+                capability = step.get("capability")
 
-                if role and role in capability_map:
-                    step["capability"] = capability_map[role]
+                # Strategy capability mapping
+                if not capability and role and role in capability_map:
+                    capability = capability_map[role]
 
-                # -------------------------------------------------
-                # 🔥 Infer capability from action if missing
-                # -------------------------------------------------
-                if not step.get("capability"):
-                
+                # Infer fallback capability
+                if not capability:
                     action_to_capability = {
                         "generate_script": "content",
                         "prepare_publish": "publishing",
                         "generate_media": "media",
                         "collect_metrics": "analytics",
                     }
+                    capability = action_to_capability.get(action)
 
-                    inferred = action_to_capability.get(step.get("action"))
-                    if inferred:
-                        step["capability"] = inferred
-
-                # -------------------------------------------------
-                # Filtering
-                # -------------------------------------------------
-                step_action = step.get("action")
-                step_capability = step.get("capability")
-
-                capability = (
-                    f"{step_capability}.{step_action}"
-                    if step_capability else step_action
-                )
-
-                if step_action in restricted:
+                # -----------------------------------------
+                # Filtering rules
+                # -----------------------------------------
+                if action in restricted:
                     continue
-                
-                if allowed and step_action not in allowed:
+
+                if allowed and action not in allowed:
                     continue
-                
+
+                full_capability = f"{capability}.{action}" if capability else action
+
                 blocked = False
+
                 for rule in restricted_caps:
-                
+
                     if rule.endswith("*"):
                         namespace = rule[:-2]
-                        if capability.startswith(namespace):
+                        if full_capability.startswith(namespace):
                             blocked = True
                             break
-                        
-                    elif rule == capability:
+
+                    elif rule == full_capability:
                         blocked = True
                         break
-                    
+
                 if blocked:
                     continue
-                
-                filtered_steps.append(step)
-            # 🔥 mover esto fuera del for
-            workflow["steps"] = filtered_steps
 
-        # -------------------------------------------------
-        # 🔥 Strategy Workflow Posture (Entity OS Layer)
-        # -------------------------------------------------
-        if workflow_profile:
+                # -----------------------------------------
+                # ABI Step (FINAL SHAPE)
+                # -----------------------------------------
+                normalized_step = {
+                    "capability": capability,
+                    "action": action,
+                }
 
-            if workflow_profile.get("publishing") == "optional":
+                filtered_steps.append(normalized_step)
 
-                if "steps" in workflow:
-                    workflow["steps"] = [
-                        step for step in workflow["steps"]
-                        if step.get("name") != "prepare_publish"
-                    ]
+        workflow["steps"] = filtered_steps
 
-            if workflow_profile.get("analytics_feedback") == "enabled":
-                workflow["analytics_enabled"] = True
-
-        # -------------------------------------------------
-        # Inject Intent Metadata (non-destructive)
-        # -------------------------------------------------
+        # Inject metadata (NON-DESTRUCTIVE)
         if intent.get("platform"):
             workflow["platform"] = intent["platform"]
 
         if intent.get("autonomy"):
             workflow["autonomy"] = intent["autonomy"]
 
+        if intent.get("analytics_enabled"):
+            workflow["analytics_enabled"] = True
+
         return workflow
-    

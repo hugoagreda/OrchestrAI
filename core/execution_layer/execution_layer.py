@@ -4,13 +4,14 @@
 from core.execution_layer.execution_context import ExecutionContext
 from core.action.action_registry import discover_actions
 from core.execution_layer.runtime_step import RuntimeStep
-
+from core.action.capability_kernel import CapabilityKernel
 
 class ExecutionLayer:
 
     def __init__(self):
-        # 🔥 Dynamic capability registry
+        # Dynamic capability registry
         self._step_registry = discover_actions()
+        self.kernel = CapabilityKernel(self._step_registry)
         self.context: ExecutionContext | None = None
 
     # =====================================================
@@ -25,7 +26,7 @@ class ExecutionLayer:
 
         print("\n--- EXECUTION START ---")
 
-        # 🔥 Convertimos dict → RuntimeStep (contrato interno)
+        # dict → RuntimeStep ABI
         for step_data in steps:
             step = RuntimeStep(step_data)
             self._execute_step(step)
@@ -41,91 +42,51 @@ class ExecutionLayer:
     def _execute_step(self, step: RuntimeStep):
 
         print(f"[RUNTIME STEP] capability={step.capability} | action={step.action}")
-        
+
         handler = self._resolve_handler(step)
 
         if not handler:
-            print(f"[UNKNOWN STEP] {step.name}")
+            print(f"[UNKNOWN STEP] {step.action}")
             return
 
-        if not self._is_step_allowed(step):
-            return
-        
         self._run_step(handler, step)
 
     # =====================================================
-    # Capability Resolver
+    # Capability Resolver (PURE OS)
     # =====================================================
     def _resolve_handler(self, step: RuntimeStep):
 
-        # -------------------------------------------------
-        # 🔥 OS-native capability resolution
-        # -------------------------------------------------
+        handler = None
 
-        if step.capability and step.action:
-            key = f"{step.capability}.{step.action}"
-            handler = self._step_registry.get(key)
+        # 1️⃣ capability.action (OS native)
+        if step.capability_key():
+            handler = self._step_registry.get(step.capability_key())
 
-            if handler:
-                return handler
+        # 2️⃣ fallback → action only
+        if not handler and step.legacy_key():
+            handler = self._step_registry.get(step.legacy_key())
 
-        # -------------------------------------------------
-        # 🔥 Fallback: action-only (backward compatibility)
-        # -------------------------------------------------
+        return handler
 
-        if step.action:
-            return self._step_registry.get(step.action)
-
-        return None
-
-
-    def _is_step_allowed(self, step: RuntimeStep) -> bool:
-
-        behavior = self.context._state.get("behavior", {})
-    
-        allowed = behavior.get("allowed_actions", [])
-        restricted = behavior.get("restricted_actions", [])
-    
-        step_action = step.action
-    
-        # -------------------------------------------------
-        # Restriction check
-        # -------------------------------------------------
-        if step_action in restricted:
-            print(f"[BLOCKED] Step restricted by behavior: {step_action}")
-            return False
-    
-        # -------------------------------------------------
-        # Allowed whitelist
-        # -------------------------------------------------
-        if allowed and step_action not in allowed:
-            print(f"[SKIPPED] Step not in allowed_actions: {step_action}")
-            return False
-    
-        return True
-    
     # =====================================================
     # Step Lifecycle Runner
     # =====================================================
     def _run_step(self, handler, step: RuntimeStep):
 
-        # 🔥 Runtime awareness (execution position)
-        self.context.set_runtime("current_step", {
-            "capability": step.capability,
-            "action": step.action,
-        })
+        # Runtime awareness
+        self.context.set_runtime("current_step", step.to_dict())
 
         # Lifecycle start
         self.context._log_event("STEP_STARTED", {
             "capability": step.capability,
-            "action": step.action,
+            "action": step.action
         })
 
         # Execute capability
-        handler(self.context)
+        self.kernel.execute(step, self.context)
 
         # Lifecycle end
         self.context._log_event("STEP_FINISHED", {
             "capability": step.capability,
-            "action": step.action,
+            "action": step.action
         })
