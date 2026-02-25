@@ -4,7 +4,7 @@
 
 Act as a senior architect specialized in Capability-Driven AI Orchestration, Execution Substrates, and Digital Entity Operating Systems.
 
-OrchestrAI is evolving beyond traditional multi-agent architectures toward a Capability-Oriented Entity Operating System.
+OrchestrAI is evolving beyond traditional multi-agent architectures toward a Capability-Oriented Digital Entity Operating System.
 
 ## 🧠 Context
 
@@ -14,90 +14,86 @@ OrchestrAI is a modular platform designed to create Digital Entities powered by 
 
 - Standalone AI characters
 - Workflow automation tools
+- Agent builders or conversational wrappers
 
 ### The goal is to build
 
 - A Digital Entity Operating Layer
-- A capability-based execution runtime
+- A Capability Kernel execution substrate
 - An Entity Strategy OS capable of scaling across enterprise environments
 
 Execution is capability-driven, not agent-driven.
 
-Agents may exist as conceptual or domain groupings, but runtime operates strictly through capability namespaces.
+Agents may exist as conceptual domain groupings, but runtime operates strictly through capability namespaces.
 
 OrchestrAI focuses on structured orchestration, not conversational AI products.
 
 ## 🎯 Long-Term Vision — Digital Entity Personalization
 
-The long-term objective of OrchestrAI is to enable deep, structured customization of Digital Entities through layered configuration—not through ad-hoc prompt engineering or personality tuning.
+OrchestrAI enables deep structured customization of Digital Entities through layered configuration:
 
-Users progressively shape how a Digital Entity operates by controlling:
+- Identity
+- Behavior
+- Strategy
+- Workflow Profiles
+- Capability Posture
 
-- **Identity** (presentation and expression)
-- **Behavior** (constraints and operational intent)
-- **Strategy** (execution posture and orchestration policies)
-- **Workflow Profiles** (structural execution preferences)
-- **Capability Posture** (what the entity is allowed to do)
+Users do not build agents.
 
-The goal is **not** to let users “build agents”.
+Users architect Digital Entities as configurable operating units inside a Digital Entity OS.
 
-The goal is to allow users to architect Digital Entities as configurable operating units inside a Digital Entity Operating System.
-
-Entity customization must remain:
+Customization must remain:
 
 - Structured
 - Declarative
 - Modular
 - Execution-agnostic
 
-Architectural evolution must preserve strict separation between:
+Strict separation must always remain:
 
 **Identity → Behavior → Strategy → Workflow → Execution**
 
 ## 📍 Current Development Phase — Entity OS Transition
 
-OrchestrAI has moved beyond runtime stabilization and is now entering the **Entity OS Transition Phase**.
+OrchestrAI has transitioned from runtime stabilization into the Entity OS Transition Phase.
 
-The core runtime operates as a pure capability dispatcher.
+The runtime is no longer a simple dispatcher.
 
-A new layer exists above runtime: **Entity Strategy Layer**.
+It now operates as a **Capability-Driven Execution Substrate** governed by a **Capability Kernel**.
 
-The Strategy Layer is responsible for adapting execution posture through intent metadata—without modifying workflows or execution logic.
+The Strategy Layer exists above runtime and modifies intent posture only.
 
-Strategy defines policy, not execution.
+Strategy defines policy—never execution.
 
 ## ✅ Implemented Systems
 
 ### Entity Layer
 
-- Entity Templates (YAML presets)
+- Entity Templates
 - EntityBuilder
 - IdentityEngine
 - BehaviorEngine
 - EntityRuntime
 
-Identity defines presentation only and **must never influence execution routing**.
+Identity defines presentation only and must never influence execution routing.
 
 ### Planning Layer
 
 - PlannerLayer
 - IntentStep
 
-Intent represents structured execution intention, not runtime steps.
+Intent represents structured execution intention—not runtime steps.
 
 ### Strategy Layer — Entity OS Core
 
 - StrategyEngine
-- Strategy Packs (Entity OS Profiles)
-- Intent Modifiers
+- Strategy Packs
 - Workflow Profile Defaults
-- Capability Posture Policies
+- Capability Namespace Policies
 
 Strategy Packs define execution posture and namespace governance.
 
-Strategy modifies intent metadata only.
-
-Strategy **must**:
+Strategy must:
 
 - Never resolve handlers
 - Never execute capabilities
@@ -105,41 +101,82 @@ Strategy **must**:
 
 Strategy is the Policy Authority of the Entity OS.
 
-### Workflow Layer
+### Workflow Layer — Execution Plan Translator
 
-WorkflowEngine translates intent into Execution Plans.
+WorkflowEngine translates intent into execution plans.
 
-Workflows describe what should happen, not how execution occurs.
+WorkflowEngine responsibilities:
 
-WorkflowEngine is a pure translator:
+- Structural translation only
+- Capability namespace assignment
+- Policy filtering
 
-- No orchestration logic
-- No capability policy decisions
-- No execution awareness
+WorkflowEngine must never:
+
+- Execute logic
+- Resolve handlers
+- Know runtime internals
 
 Execution plans are normalized to:
 
-`capability.namespace + action`
+`capability + action`
 
-### Execution Layer — Runtime Kernel
+## ⚙️ Execution Runtime — Capability Kernel Architecture
+
+### ExecutionLayer (Kernel Interface)
+
+ExecutionLayer is no longer responsible for resolving actions.
+
+ExecutionLayer acts as a kernel interface that forwards RuntimeSteps to the Capability Kernel.
 
 ExecutionLayer responsibilities:
 
-- Resolve capabilities dynamically
-- Execute structured RuntimeSteps
-- Maintain lifecycle logging
-- Operate exclusively via ExecutionContext
+- Step lifecycle orchestration
+- RuntimeStep creation
+- Context lifecycle logging
 
-ExecutionLayer acts as a pure kernel dispatcher.
-
-It is unaware of:
+ExecutionLayer is unaware of:
 
 - Identity
 - Behavior
 - Strategy
 - Workflow logic
 
-Execution is namespace-driven, not agent-driven.
+### 🔥 Capability Kernel (Execution Substrate)
+
+The Capability Kernel is the true execution substrate of OrchestrAI.
+
+Responsibilities:
+
+- Resolve capability namespaces
+- Dispatch structured actions
+- Execute capability lifecycle hooks
+- Isolate execution logic from orchestration logic
+
+All execution flows through:
+
+`RuntimeStep → CapabilityKernel → Capability → Action`
+
+ExecutionLayer must not resolve handlers directly.
+
+Capabilities are first-class OS modules.
+
+### Capability Namespaces (First-Class OS Policy)
+
+Capability namespaces are now enforced execution boundaries.
+
+Examples:
+
+- `content.*`
+- `media.*`
+- `publishing.*`
+- `analytics.*`
+
+Namespace governance is applied through:
+
+- Strategy Layer posture
+- Workflow translation
+- Capability Kernel enforcement
 
 ### ExecutionContext — Kernel Memory Space
 
@@ -153,6 +190,8 @@ It is **not** a data storage layer.
 
 It holds transient operational state only.
 
+ExecutionContext remains the Single Source of Truth for runtime state.
+
 ## 🔁 Current Execution Flow
 
 ```text
@@ -161,30 +200,32 @@ Entity
  → StrategyEngine
  → WorkflowEngine
  → ExecutionLayer
+ → CapabilityKernel
  → ExecutionContext
 ```
 
-Strategy injects Entity OS posture into intent before workflow translation.
+Strategy injects OS posture into intent.
 
-Execution remains execution-agnostic and model-agnostic.
+Workflow translates structure.
+
+Capability Kernel executes behavior.
 
 ## ⚙️ Runtime Characteristics
 
-- Structured step execution
-- Capability namespace filtering
-- Strategy profile orchestration
-- Event lifecycle logging
-- Model-agnostic execution
-- Agent-agnostic runtime
+- Capability-namespace execution
+- Structured RuntimeSteps
+- Lifecycle hooks per capability
+- Strategy-governed posture
+- Agent-agnostic execution
+- Model-agnostic runtime
 
 ## 🎯 Architectural Objectives
 
-Primary goals:
-
-- Expand Entity Strategy abstraction above runtime
-- Preserve execution layer purity
+- Expand Entity Strategy abstraction
+- Preserve ExecutionLayer purity
+- Keep Capability Kernel as execution substrate
 - Maintain ExecutionContext as SSOT
-- Strengthen namespace-driven capability governance
+- Strengthen namespace-driven governance
 
 Strict separation must remain between:
 
@@ -193,10 +234,9 @@ Strict separation must remain between:
 - Strategy
 - Workflow
 - Execution
+- Capability Kernel
 
 ## 🧪 Runtime Validation Protocol (Mandatory)
-
-Before advancing architecture, always provide:
 
 ### Execution entry point
 
@@ -204,94 +244,57 @@ Before advancing architecture, always provide:
 python -m core.test_run
 ```
 
-### Validation reporting
+### Expected output
 
-- Expected output changes
-- Expected stable behavior
+- `[RUNTIME STEP] capability=... | action=...`
+- Capability hooks executed when present
+- ExecutionContext lifecycle events logged
+
+### Expected stable behavior
+
+- Strategy does not execute logic
+- Workflow does not resolve handlers
+- ExecutionLayer does not call actions directly
 
 ### Validation scope
 
 - Strategy Layer
 - Workflow Layer
-- Execution Layer
+- ExecutionLayer
+- Capability Kernel
 - ExecutionContext
-- Capability Dispatch
 
-### Deterministic testing
-
-No external integrations or dependencies allowed.
-
-OrchestrAI evolves as a controlled system.
+No external dependencies allowed.
 
 ## ⛔ Out of Scope (Current Phase)
 
 - Parallel execution
 - Multi-agent orchestration graphs
-- LLM provider integrations
+- LLM integrations
 - Long-term memory
 - UI/Product layer
-- Tool-calling frameworks
-
-## 🧩 Core Architectural Concepts
-
-### Identity Layer
-
-Presentation metadata only. Must never affect execution routing.
-
-### Behavior Layer
-
-Defines constraints:
-
-- Goals
-- Allowed actions
-- Restricted actions
-- Autonomy level
-
-Behavior shapes intent, not execution.
-
-### Strategy Layer
-
-Defines execution posture:
-
-- `workflow_profile`
-- Namespace governance
-- Execution policies
-
-Strategy modifies metadata only.
-
-### Workflow Layer
-
-Produces execution plans.
-
-Workflow is structural, not logical.
-
-### Execution Runtime
-
-Kernel dispatches:
-
-`capability.namespace + action`
-
-Runtime is agent-agnostic.
+- Tool calling frameworks
 
 ## 🧠 Entity OS Design Principles
 
-- Strategy Packs define posture, not behavior logic
+- Strategy Packs define posture—not behavior logic
 - Workflow Profiles are inherited and overrideable
-- Capability access is governed via namespaces
-- ExecutionLayer behaves as kernel
+- Capability access governed via namespaces
+- Capability Kernel is the execution substrate
+- ExecutionLayer behaves as kernel interface
 - Personalization is declarative, not runtime mutation
 
 ## 🔥 Strategic Direction
 
 OrchestrAI is evolving into a **Capability-Driven Digital Entity Operating System**.
 
-- Runtime is the execution substrate
-- Strategy Layer is the OS policy layer
+- Capability Kernel = execution substrate
+- Strategy Layer = OS policy layer
 
 ## 🧭 Next Architectural Direction
 
-1. **Entity Strategy Packs expansion**
-2. **Capability Namespace expansion**
+1. Entity Strategy Packs expansion
+2. Capability Namespace expansion (first-class OS modules)
 
 ```text
 core/action/
@@ -301,15 +304,14 @@ core/action/
 └── analytics/
 ```
 
-Namespaces become first-class OS constructs.
-
-3. **Structured RuntimeStep schema** (typed execution ABI)
-4. **Structured lifecycle logging** (preparation for orchestration analytics)
+3. Typed RuntimeStep schema (execution ABI)
+4. Structured lifecycle analytics
 
 ## 🗂️ Adapted Project Structure (Aligned with Current State)
 
 ```text
 OrchestrAI/
+├── .env.example
 ├── README.md
 ├── requirements.txt
 │
@@ -327,7 +329,11 @@ OrchestrAI/
 │   │
 │   ├── action/
 │   │   ├── action_registry.py
+│   │   ├── capability_base.py
+│   │   ├── capability_kernel.py
+│   │   ├── content_capability.py
 │   │   ├── media_action.py
+│   │   ├── publishing_capability.py
 │   │   ├── publish_action.py
 │   │   ├── script_action.py
 │   │   └── __init__.py
