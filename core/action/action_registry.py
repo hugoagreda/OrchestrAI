@@ -20,11 +20,15 @@ def discover_actions():
 
             if callable(fn) and not attr.startswith("_"):
 
-                # ✔️ registro clásico (backward compatible)
-                registry[attr] = fn
-
-                # 🔥 nuevo registro por namespace
+                # 🔥 OS-native capability registry
                 capability_key = f"{module_name}.{attr}"
                 registry[capability_key] = fn
+
+                # -------------------------------------------------
+                # Legacy fallback (temporary)
+                # -------------------------------------------------
+                # Esto se eliminará cuando el sistema sea 100% capability-driven
+                if attr not in registry:
+                    registry[attr] = fn
 
     return registry

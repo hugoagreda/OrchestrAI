@@ -1,16 +1,37 @@
 class IntentStep:
-    """
-    High-level planner output.
-    Represents intention, NOT execution.
-    """
 
     def __init__(self, data: dict):
-        self.objective = data.get("objective")
-        self.content_type = data.get("content_type")
-        self.platform = data.get("platform")
-        self.tone = data.get("tone")
-        self.visual_style = data.get("visual_style")
-        self.raw = data
+
+        # 🔥 RAW DATA (source of truth)
+        self.raw = data or {}
+
+        # 🔥 Promote core fields to root
+        self._promote_fields()
+
+    # =====================================================
+    # FIELD PROMOTION (OS CONTRACT)
+    # =====================================================
+
+    def _promote_fields(self):
+
+        for key, value in self.raw.items():
+            setattr(self, key, value)
+
+    # =====================================================
+    # UPDATE RAW (used by StrategyEngine)
+    # =====================================================
+
+    def update(self, data: dict):
+
+        if not data:
+            return
+
+        self.raw.update(data)
+        self._promote_fields()
+
+    # =====================================================
+    # SERIALIZATION
+    # =====================================================
 
     def to_dict(self):
         return self.raw

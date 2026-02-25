@@ -1,28 +1,26 @@
 class ExecutionContext:
-
     """
-    Shared runtime state container.
-    Acts as:
-        - State store
-        - Artifact registry
-        - Event log (future orchestration ready)
+    Kernel State Container.
+
+    Responsibilities:
+        - Identity hydration
+        - Behavior constraints
+        - Capability memory (runtime data)
+        - Artifact storage
+        - Lifecycle events
     """
 
     def __init__(self):
 
         # -------------------------
-        # CORE STATE (structured)
+        # CORE STATE (OS-native)
         # -------------------------
         self._state = {
             "identity": {},
             "behavior": {},
-            "execution": {
-                "script": None,
-                "media_assets": [],
-                "publish_ready": False
-            },
+            "memory": {},     # 🔥 antes "execution"
             "artifacts": {},
-            "runtime": {} 
+            "runtime": {}
         }
 
         # -------------------------
@@ -31,7 +29,7 @@ class ExecutionContext:
         self._events = []
 
     # =====================================================
-    # 🔥 HYDRATION (PASO 1 REAL)
+    # HYDRATION
     # =====================================================
 
     def load_identity(self, identity_data: dict):
@@ -43,22 +41,22 @@ class ExecutionContext:
         self._log_event("BEHAVIOR_LOADED", {})
 
     # =====================================================
-    # STATE ACCESS (execution namespace)
+    # MEMORY (capability outputs)
     # =====================================================
 
     def set(self, key, value):
         """
-        Backward compatible setter.
-        Writes into execution namespace by default.
+        OS-native memory write.
+        Capabilities store runtime outputs here.
         """
-        self._state["execution"][key] = value
+        self._state["memory"][key] = value
         self._log_event("STATE_UPDATED", {key: value})
 
     def get(self, key, default=None):
-        return self._state["execution"].get(key, default)
+        return self._state["memory"].get(key, default)
 
     # =====================================================
-    # RUNTIME HELPERS (NUEVO)
+    # RUNTIME (kernel internal)
     # =====================================================
 
     def set_runtime(self, key, value):

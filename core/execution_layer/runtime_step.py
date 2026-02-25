@@ -1,35 +1,35 @@
 class RuntimeStep:
     """
-    Internal structured representation of a workflow step.
-    Does NOT replace workflow YAML.
-    Only stabilizes runtime execution.
+    OS-native runtime step.
+
+    Execution ABI:
+        capability.namespace + action
+
+    Agents are NOT part of execution anymore.
     """
 
     def __init__(self, data: dict):
 
-        self.name = data.get("name")
-        self.role = data.get("role")
+        self.action = data.get("action")
         self.capability = data.get("capability")
-        self.raw = data  # 👈 mantiene compatibilidad total
+
+        # metadata opcional
+        self.metadata = data.get("metadata", {})
+        self.raw = data
 
     # -------------------------------------------------
-    # Helper keys (para resolver sin repetir lógica)
+    # OS-native key
     # -------------------------------------------------
-    def capability_key(self):
-        return self.capability
-
-    def namespaced_key(self):
-        if self.role and self.name:
-            return f"{self.role}.{self.name}"
+    def capability_action_key(self):
+        if self.capability and self.action:
+            return f"{self.capability}.{self.action}"
         return None
 
-    def legacy_key(self):
-        return self.name
+    # -------------------------------------------------
+    # Legacy fallback (temporary)
+    # -------------------------------------------------
+    def action_key(self):
+        return self.action
 
     def to_dict(self):
         return self.raw
-    
-    def capability_namespace(self):
-        if self.role and self.name:
-            return f"{self.role}.{self.name}"
-        return self.name

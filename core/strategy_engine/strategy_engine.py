@@ -1,6 +1,13 @@
 from pathlib import Path
 import yaml
 
+# 🔥 OS Capability Namespace Mapping
+ROLE_CAPABILITY_MAP = {
+    "scriptwriter": "content",
+    "media": "media",
+    "publisher": "publishing",
+    "analytics": "analytics",
+}
 
 class StrategyEngine:
 
@@ -31,13 +38,11 @@ class StrategyEngine:
                     intent_data[key] = value
 
         # -------------------------------------------------
-        # 2️⃣ Workflow Profile Defaults (NEW — OS posture)
+        # 2️⃣ Workflow Profile Defaults (OS posture)
         # -------------------------------------------------
         pack_workflow_defaults = pack.get("workflow_profile_defaults", {})
         entity_workflow_profile = runtime_entity.get("workflow_profile", {})
 
-        # Strategy pack define defaults,
-        # entidad puede overridear
         merged_workflow_profile = {
             **pack_workflow_defaults,
             **entity_workflow_profile
@@ -46,7 +51,7 @@ class StrategyEngine:
         intent_data["workflow_profile"] = merged_workflow_profile
 
         # -------------------------------------------------
-        # 3️⃣ Workflow Profile Runtime Flags (existing logic)
+        # 3️⃣ Workflow Profile Runtime Flags
         # -------------------------------------------------
         workflow_profile = merged_workflow_profile
 
@@ -61,6 +66,12 @@ class StrategyEngine:
 
         if workflow_profile.get("analytics_feedback") == "enabled":
             intent_data["analytics_enabled"] = True
+
+        # -------------------------------------------------
+        # 🔥 NEW — Inject OS Capability Mapping
+        # -------------------------------------------------
+        # StrategyEngine now owns namespace definition
+        intent_data["capability_map"] = ROLE_CAPABILITY_MAP
 
         return intent_step.__class__(intent_data)
 

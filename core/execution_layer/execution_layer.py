@@ -40,6 +40,8 @@ class ExecutionLayer:
     # =====================================================
     def _execute_step(self, step: RuntimeStep):
 
+        print(f"[RUNTIME STEP] capability={step.capability} | action={step.action}")
+        
         handler = self._resolve_handler(step)
 
         if not handler:
@@ -56,40 +58,50 @@ class ExecutionLayer:
     # =====================================================
     def _resolve_handler(self, step: RuntimeStep):
 
-        handler = None
+        # -------------------------------------------------
+        # 🔥 OS-native capability resolution
+        # -------------------------------------------------
 
-        # 1️⃣ capability explícita
-        if step.capability_key():
-            handler = self._step_registry.get(step.capability_key())
+        if step.capability and step.action:
+            key = f"{step.capability}.{step.action}"
+            handler = self._step_registry.get(key)
 
-        # 2️⃣ role + name namespace
-        if not handler and step.namespaced_key():
-            handler = self._step_registry.get(step.namespaced_key())
+            if handler:
+                return handler
 
-        # 3️⃣ fallback legacy
-        if not handler and step.legacy_key():
-            handler = self._step_registry.get(step.legacy_key())
+        # -------------------------------------------------
+        # 🔥 Fallback: action-only (backward compatibility)
+        # -------------------------------------------------
 
-        return handler
+        if step.action:
+            return self._step_registry.get(step.action)
+
+        return None
 
 
     def _is_step_allowed(self, step: RuntimeStep) -> bool:
 
         behavior = self.context._state.get("behavior", {})
-
+    
         allowed = behavior.get("allowed_actions", [])
         restricted = behavior.get("restricted_actions", [])
-
-        step_name = step.name
-
-        if step_name in restricted:
-            print(f"[BLOCKED] Step restricted by behavior: {step_name}")
+    
+        step_action = step.action
+    
+        # -------------------------------------------------
+        # Restriction check
+        # -------------------------------------------------
+        if step_action in restricted:
+            print(f"[BLOCKED] Step restricted by behavior: {step_action}")
             return False
-
-        if allowed and step_name not in allowed:
-            print(f"[SKIPPED] Step not in allowed_actions: {step_name}")
+    
+        # -------------------------------------------------
+        # Allowed whitelist
+        # -------------------------------------------------
+        if allowed and step_action not in allowed:
+            print(f"[SKIPPED] Step not in allowed_actions: {step_action}")
             return False
-
+    
         return True
     
     # =====================================================
@@ -97,16 +109,16 @@ class ExecutionLayer:
     # =====================================================
     def _run_step(self, handler, step: RuntimeStep):
 
-        step_name = step.name
-        step_role = step.role
-
         # 🔥 Runtime awareness (execution position)
-        self.context.set_runtime("current_step", step.to_dict())
+        self.context.set_runtime("current_step", {
+            "capability": step.capability,
+            "action": step.action,
+        })
 
         # Lifecycle start
         self.context._log_event("STEP_STARTED", {
-            "step": step_name,
-            "role": step_role
+            "capability": step.capability,
+            "action": step.action,
         })
 
         # Execute capability
@@ -114,6 +126,6 @@ class ExecutionLayer:
 
         # Lifecycle end
         self.context._log_event("STEP_FINISHED", {
-            "step": step_name,
-            "role": step_role
+            "capability": step.capability,
+            "action": step.action,
         })
