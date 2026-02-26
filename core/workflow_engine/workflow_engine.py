@@ -21,98 +21,73 @@ class WorkflowEngine:
             return yaml.safe_load(f)
 
     # -------------------------------------------------
-    # Build Workflow (PURE TRANSLATOR)
+    # Build Workflow (PURE STRUCTURAL TRANSLATOR)
     # -------------------------------------------------
     def build_workflow(self, intent: dict) -> dict:
 
         workflow_id = intent.get("content_type", "generic")
-
         workflow_data = self._load_workflow(workflow_id)
-
-        allowed = intent.get("allowed_actions", [])
-        restricted = intent.get("restricted_actions", [])
-        restricted_caps = intent.get("restricted_capabilities", [])
-        capability_map = intent.get("capability_map", {})
 
         profile = "default"
 
+        # Strategy profiles supported structurally
         if "strategies" in workflow_data:
             workflow = dict(workflow_data["strategies"][profile])
         else:
             workflow = dict(workflow_data)
 
-        filtered_steps = []
+        normalized_steps = []
 
+        # -------------------------------------------------
+        # 🔥 WORKFLOW PROFILE (STRUCTURAL ONLY)
+        # -------------------------------------------------
+        workflow_profile = intent.get("workflow_profile", {})
+
+        media_enabled = workflow_profile.get("media_generation", "enabled") != "disabled"
+        publishing_mode = workflow_profile.get("publishing", "enabled")
+        analytics_enabled = workflow_profile.get("analytics_feedback", False)
+
+        # -------------------------------------------------
+        # 🔥 ABI NORMALIZATION + STRUCTURAL FILTER
+        # -------------------------------------------------
         if "steps" in workflow:
 
             for step in workflow["steps"]:
-
-                # -----------------------------------------
-                # 🔥 Normalize to OS-native schema
-                # -----------------------------------------
                 action = step.get("action") or step.get("name")
                 role = step.get("role")
 
-                if not action:
+                # ------------------------------------------
+                # STRUCTURAL FILTER (NOT POLICY ENFORCEMENT)
+                # ------------------------------------------
+                if role == "media" and not media_enabled:
                     continue
 
-                capability = step.get("capability")
-
-                # Strategy capability mapping
-                if not capability and role and role in capability_map:
-                    capability = capability_map[role]
-
-                # Infer fallback capability
-                if not capability:
-                    action_to_capability = {
-                        "generate_script": "content",
-                        "prepare_publish": "publishing",
-                        "generate_media": "media",
-                        "collect_metrics": "analytics",
-                    }
-                    capability = action_to_capability.get(action)
-
-                # -----------------------------------------
-                # Filtering rules
-                # -----------------------------------------
-                if action in restricted:
+                if role == "strategist" and publishing_mode == "disabled":
                     continue
 
-                if allowed and action not in allowed:
+                if role == "analytics" and not analytics_enabled:
                     continue
 
-                full_capability = f"{capability}.{action}" if capability else action
+                capability_map = intent.get("capability_map", {})
+                namespace = capability_map.get(role, "unknown")
 
-                blocked = False
-
-                for rule in restricted_caps:
-
-                    if rule.endswith("*"):
-                        namespace = rule[:-2]
-                        if full_capability.startswith(namespace):
-                            blocked = True
-                            break
-
-                    elif rule == full_capability:
-                        blocked = True
-                        break
-
-                if blocked:
-                    continue
-
-                # -----------------------------------------
-                # ABI Step (FINAL SHAPE)
-                # -----------------------------------------
                 normalized_step = {
-                    "capability": capability,
+                    "capability": namespace,
                     "action": action,
+                    "payload": step.get("payload", {}),
+                    "metadata": {
+                        "role": role,
+                        "original_intent": intent.get("query")
+                    }
                 }
 
-                filtered_steps.append(normalized_step)
+                normalized_steps.append(normalized_step)
 
-        workflow["steps"] = filtered_steps
+        workflow["steps"] = normalized_steps
 
-        # Inject metadata (NON-DESTRUCTIVE)
+        # -------------------------------------------------
+        # Metadata Injection (NON-DESTRUCTIVE)
+        # -------------------------------------------------
         if intent.get("platform"):
             workflow["platform"] = intent["platform"]
 

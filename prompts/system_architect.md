@@ -38,6 +38,26 @@ OrchestrAI enables organizations to:
 - Maintain lifecycle traceability
 - Scale AI operations without operational chaos
 
+Future product vision:
+
+- Provide a service where any company can create agents for any business function.
+- Support broad use cases (operations, support, analytics, content, internal workflows, etc.) without forcing a single template.
+- Integrate into existing enterprise environments rather than replacing complete internal systems.
+- Operate goal-first: each department only provides available APIs and the desired outcome.
+- Avoid manual low-level wiring of connections as a default user experience.
+- Autonomously coordinate the best AI/model per task (multi-provider orchestration) according to policy, cost, latency, and quality.
+
+Product positioning (reverse workflow-builder UX):
+
+- Not a manual node-connection builder where users must design every edge.
+- A governed autonomous orchestrator where users define objectives and constraints, while the platform composes and executes the plan.
+
+Data posture (non-custodial by design):
+
+- OrchestrAI should not store enterprise proprietary data by default.
+- The client company remains responsible for its own data lifecycle, ownership, and compliance obligations.
+- The platform focuses on orchestration and governance, not customer data warehousing.
+
 Digital Entities remain internal execution abstractions — not product surface features.
 
 Customization is declarative and layered:
@@ -62,11 +82,11 @@ Digital Entities represent configurable operating units inside the execution sub
 
 Entities are internal system constructs enabling structured orchestration.
 
-## 📍 Current Development Phase — Governed Execution Transition
+## 📍 Current Development Phase — Governed Execution Substrate
 
-OrchestrAI has transitioned from runtime stabilization into a Governed Execution Substrate phase.
+OrchestrAI has transitioned from runtime stabilization into a governed execution substrate with observability and async-ready execution.
 
-- The runtime is no longer a dispatcher.
+- The runtime is no longer a direct dispatcher.
 - It operates as a Capability-Driven Execution Substrate governed by a Capability Kernel.
 - Strategy exists **ABOVE** runtime as a posture authority.
 - Strategy defines policy — never execution.
@@ -128,7 +148,7 @@ Responsibilities:
 
 - Structural normalization
 - Capability namespace assignment
-- Policy filtering
+- Metadata/payload passthrough
 
 WorkflowEngine **MUST NEVER**:
 
@@ -152,8 +172,9 @@ ExecutionLayer acts strictly as a kernel interface.
 
 Responsibilities:
 
-- RuntimeStep lifecycle orchestration
-- ExecutionContext logging
+- RuntimeStep lifecycle orchestration (sync + async-ready)
+- ExecutionContext logging + metrics collection
+- Optional profiling hooks (pipeline/step durations)
 - Forwarding steps to Capability Kernel
 
 ExecutionLayer is unaware of:
@@ -173,8 +194,12 @@ Responsibilities:
 
 - Namespace resolution
 - Structured action dispatch
+- Manifest schema validation (boot-time)
+- Payload validation (pre-flight)
 - Lifecycle hook orchestration
 - Execution isolation
+- Handler cache with cache stats
+- Sync + async execution paths
 
 Execution flow:
 
@@ -206,6 +231,7 @@ ExecutionContext acts as:
 - Transient runtime memory
 - Artifact reference registry
 - Lifecycle audit trail
+- Runtime metrics registry (step outcomes, durations, cache stats)
 
 ExecutionContext is **NOT**:
 
@@ -239,6 +265,12 @@ Entity
 - Strategy-governed posture
 - Model-agnostic runtime
 - Agent-agnostic execution
+- Multi-model selection by task/domain (best model for each capability)
+- Goal-first orchestration (intent + APIs in, executable plan out)
+- Minimal human wiring as default operating mode
+- Optional profiling (`enable_profiling=True`)
+- Async-ready execution path (`execute_async`)
+- Kernel cache observability (`hits`, `misses`, `size`)
 
 ## 🎯 Architectural Objectives (Updated)
 
@@ -248,6 +280,11 @@ Entity
 - Maintain ExecutionContext as SSOT
 - Strengthen namespace-driven governance
 - Enable enterprise execution traceability
+- Keep async-ready execution path stable
+- Keep profiling and cache telemetry reliable
+- Standardize objective-first execution contracts for departments
+- Add policy-aware model routing (quality/cost/latency/compliance)
+- Reduce manual workflow wiring to exception cases only
 
 ## 🧪 Runtime Validation Protocol
 
@@ -270,6 +307,12 @@ Validation guarantees:
 - ExecutionLayer does not call actions
 - Kernel governs execution
 
+Unit tests:
+
+```bash
+python -m unittest discover -s core/tests -p "test_*.py"
+```
+
 ## ⛔ Out of Scope (Current Phase)
 
 - Parallel execution
@@ -287,6 +330,9 @@ Validation guarantees:
 - Capability Kernel is execution substrate
 - ExecutionLayer is kernel interface
 - Personalization is declarative, not runtime mutation
+- Users provide objectives and integrations; the platform composes execution
+- Human manual wiring is optional fallback, not primary operating model
+- Choose each AI/model for its strongest domain under governance policies
 
 ## 🔥 Strategic Direction (Refined)
 
@@ -302,30 +348,34 @@ Internally:
 Externally:
 
 - Governed execution platform for enterprise AI operations
+- Agent-creation service for any company domain (not limited to one vertical)
+- Integration-first model that coexists with enterprise internal systems
+- Non-custodial data posture (no default enterprise data storage)
+- Reverse-builder experience: objective-first orchestration instead of connection-first design
+- Autonomous multi-model coordination to use the strongest AI per task
 
 ## 🧭 Next Architectural Direction
 
 - Execution Posture Strategy Packs expansion
-- Capability Manifest system (OS contracts)
+- Workflow profile selection (beyond hardcoded default)
 - Typed RuntimeStep ABI stabilization
 - Structured lifecycle analytics (enterprise observability)
+- Optional parallel execution model over current async-ready substrate
+- Policy-driven model router (provider scoring by domain/latency/cost/quality)
+- Department-level objective templates ("connect APIs + desired outcome")
+- Explainability layer for model/plan decisions (why this model/why this path)
 
 ## 🗂️ Adapted Project Structure (Aligned with Current State)
 
 ```text
 OrchestrAI/
 ├── .env.example
+├── clase.py
 ├── README.md
 ├── requirements.txt
 │
-├── agents/
-│   ├── analytics/
-│   ├── editor/
-│   ├── media/
-│   ├── scriptwriter/
-│   └── strategist/
-│
 ├── core/
+│   ├── __init__.py
 │   ├── config.py
 │   ├── pipeline.py
 │   ├── test_run.py
@@ -334,41 +384,68 @@ OrchestrAI/
 │   │   ├── action_registry.py
 │   │   ├── capability_base.py
 │   │   ├── capability_kernel.py
-│   │   ├── content_capability.py
+│   │   ├── content_generate_script.py
 │   │   ├── media_action.py
-│   │   ├── publishing_capability.py
-│   │   ├── publish_action.py
-│   │   ├── script_action.py
+│   │   ├── publishing_prepare_publish.py
+│   │   ├── analytics/
+│   │   │   ├── __init__.py
+│   │   │   ├── analytics_actions.py
+│   │   │   └── capability.yaml
+│   │   ├── content/
+│   │   │   ├── __init__.py
+│   │   │   ├── capability.yaml
+│   │   │   ├── content_actions.py
+│   │   │   └── manifest.yaml
+│   │   ├── media/
+│   │   │   ├── __init__.py
+│   │   │   ├── capability.yaml
+│   │   │   └── media_actions.py
+│   │   ├── publishing/
+│   │   │   ├── __init__.py
+│   │   │   ├── capability.yaml
+│   │   │   └── publishing_actions.py
 │   │   └── __init__.py
 │   │
 │   ├── behavior_engine/
+│   │   ├── __init__.py
 │   │   └── behavior_engine.py
 │   │
 │   ├── entity_engine/
+│   │   ├── __init__.py
 │   │   ├── entity_builder.py
 │   │   └── entity_runtime.py
 │   │
 │   ├── execution_layer/
+│   │   ├── __init__.py
 │   │   ├── execution_context.py
 │   │   ├── execution_layer.py
 │   │   └── runtime_step.py
 │   │
 │   ├── identity_engine/
+│   │   ├── __init__.py
 │   │   └── identity_engine.py
 │   │
 │   ├── planner_layer/
+│   │   ├── __init__.py
 │   │   ├── intent_step.py
 │   │   └── planner_layer.py
 │   │
 │   ├── strategy_engine/
+│   │   ├── __init__.py
 │   │   └── strategy_engine.py
 │   │
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   ├── test_capability_kernel.py
+│   │   ├── test_execution_context.py
+│   │   ├── test_execution_layer.py
+│   │   ├── test_runtime_step.py
+│   │   ├── test_strategy_engine.py
+│   │   └── test_workflow_engine.py
+│   │
 │   └── workflow_engine/
+│       ├── __init__.py
 │       └── workflow_engine.py
-│
-├── orchestrator/
-│   ├── n8n/
-│   └── workflows/
 │
 ├── presets/
 │   ├── entity_templates/
@@ -383,11 +460,6 @@ OrchestrAI/
 │
 ├── prompts/
 │   └── system_architect.md
-│
-├── schemas/
-│   ├── content_schema.json
-│   ├── entity_schema.json
-│   └── step_schema.json
 │
 └── storage/
     ├── assets/

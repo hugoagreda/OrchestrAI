@@ -1,0 +1,20 @@
+namespace: content
+version: "1.1.0"
+description: "Content generation and script management capability."
+
+actions:
+  generate_script:
+    description: "Generates a script based on a topic and tone."
+    handler: "content_actions.generate_script"
+    required_payload: ["topic", "tone"]
+    provides_context: ["script_raw"]
+    
+  refine_hook:
+    description: "Optimizes the first 3 seconds of a script."
+    handler: "content_actions.refine_hook"
+    required_payload: ["script_raw"]
+    provides_context: ["optimized_hook"]
+
+governance:
+  isolation_level: "high"
+  allow_external_calls: true

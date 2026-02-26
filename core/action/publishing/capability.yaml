@@ -1,0 +1,14 @@
+namespace: publishing
+version: "1.0.0"
+description: "Content publishing and distribution capability."
+
+actions:
+  prepare_publish:
+    description: "Prepares content for publication."
+    handler: "publishing_actions.prepare_publish"
+    required_payload: []
+    provides_context: ["publish_ready"]
+
+governance:
+  isolation_level: "medium"
+  allow_external_calls: true

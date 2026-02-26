@@ -15,6 +15,11 @@ def discover_actions():
 
         module = importlib.import_module(f"core.action.{module_name}")
 
+        module_namespace = getattr(module, "NAMESPACE", None)
+
+        if not module_namespace and "_" in module_name:
+            module_namespace = module_name.split("_", 1)[0]
+
         for attr in dir(module):
             fn = getattr(module, attr)
 
@@ -23,6 +28,11 @@ def discover_actions():
                 # 🔥 OS-native capability registry
                 capability_key = f"{module_name}.{attr}"
                 registry[capability_key] = fn
+
+                # Namespace-native key (capability.action)
+                if module_namespace:
+                    namespace_key = f"{module_namespace}.{attr}"
+                    registry[namespace_key] = fn
 
                 # -------------------------------------------------
                 # Legacy fallback (temporary)

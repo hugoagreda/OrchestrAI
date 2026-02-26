@@ -5,6 +5,8 @@ from core.strategy_engine.strategy_engine import StrategyEngine
 from core.workflow_engine.workflow_engine import WorkflowEngine
 from core.execution_layer.execution_layer import ExecutionLayer
 
+# --- NUEVAS IMPORTACIONES PARA EL RING 0 ---
+from core.action.capability_kernel import CapabilityKernel
 
 # =====================================================
 # 🧠 DEBUG HELPERS
@@ -31,10 +33,16 @@ def debug_dump(label, data):
 
 
 # =====================================================
-# 🔥 DEFINITIVE TEST RUN
+# 🔥 DEFINITIVE TEST RUN (CONSOLIDATED)
 # =====================================================
 
 def main():
+
+    # =====================================================
+    # 0️⃣ KERNEL INITIALIZATION (OS BOOT)
+    # =====================================================
+    # Initialize kernel (manifest discovery via _boot_sequence)
+    kernel = CapabilityKernel()
 
     # =====================================================
     # 1️⃣ ENTITY BUILD
@@ -75,6 +83,17 @@ def main():
     strategy = StrategyEngine()
     strategized_intent = strategy.apply_strategy(intent, entity)
 
+    posture = {
+        "restricted_capabilities": strategized_intent.to_dict().get("restricted_capabilities", []),
+        "allowed_actions": strategized_intent.to_dict().get("allowed_actions", []),
+        "autonomy": strategized_intent.to_dict().get("autonomy"),
+    }
+
+    context.set_runtime("execution_posture", posture)
+    
+    print("\n[POSTURE SNAPSHOT INJECTED]")
+    print(posture)
+
     debug_dump("ACTION PLAN (STRATEGIZED - ROOT)", strategized_intent)
 
     if hasattr(strategized_intent, "raw"):
@@ -101,6 +120,7 @@ def main():
     debug_section("WORKFLOW ENGINE")
 
     workflow_engine = WorkflowEngine()
+    # Pasamos el diccionario que incluye el 'capability_map' inyectado por Strategy
     workflow = workflow_engine.build_workflow(strategized_intent.to_dict())
 
     debug_dump("WORKFLOW BUILT", workflow)
@@ -111,14 +131,15 @@ def main():
             print(f"{i}. capability={step.get('capability')} | action={step.get('action')}")
 
     # =====================================================
-    # 6️⃣ EXECUTION LAYER
+    # 6️⃣ EXECUTION LAYER (INJECTED KERNEL)
     # =====================================================
     debug_section("EXECUTION LAYER")
 
-    executor = ExecutionLayer()
+    # Inyectamos el Kernel para cumplir con la nueva arquitectura
+    executor = ExecutionLayer(kernel)
 
-    print("\n[EXECUTION] Starting kernel...")
-    executor.execute(workflow, context)
+    print("\n[EXECUTION] Starting kernel dispatch...")
+    executor.execute(workflow, context, enable_profiling=True)
 
     # =====================================================
     # 7️⃣ FINAL CONTEXT
@@ -133,3 +154,5 @@ def main():
 # =====================================================
 if __name__ == "__main__":
     main()
+
+# Ejecución: python -m core.test_run

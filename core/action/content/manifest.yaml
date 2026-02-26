@@ -1,0 +1,19 @@
+# Ejemplo: core/action/content/capability.yaml
+namespace: content
+version: "1.1.0"
+description: "Gestión y generación de guiones y texto estructural."
+
+actions:
+  generate_script:
+    description: "Genera un guion basado en un tópico."
+    required_payload: ["topic", "tone"]
+    provides_context: ["script_raw"]
+    
+  refine_hook:
+    description: "Optimiza los primeros 3 segundos del guion."
+    required_payload: ["script_raw"]
+    provides_context: ["optimized_hook"]
+
+governance:
+  isolation_level: "high"
+  allow_external_calls: true

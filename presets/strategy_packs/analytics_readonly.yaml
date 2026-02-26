@@ -1,0 +1,17 @@
+name: analytics_readonly
+version: 1.0.0
+
+autonomy: low
+
+restricted_capabilities:
+  - content.*
+  - media.*
+  - publishing.*
+
+allowed_actions:
+  - analyze_metrics
+
+workflow_profile:
+  media_generation: disabled
+  publishing: disabled
+  analytics_feedback: enabled

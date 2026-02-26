@@ -1,92 +1,175 @@
-# Dynamic executor with auto-discovered actions
-# Capability-aware dispatcher with structured lifecycle.
-
 from core.execution_layer.execution_context import ExecutionContext
-from core.action.action_registry import discover_actions
 from core.execution_layer.runtime_step import RuntimeStep
-from core.action.capability_kernel import CapabilityKernel
+import time
 
 class ExecutionLayer:
-
-    def __init__(self):
-        # Dynamic capability registry
-        self._step_registry = discover_actions()
-        self.kernel = CapabilityKernel(self._step_registry)
+    def __init__(self, kernel):
+        # La Layer recibe el Kernel ya configurado (Inyección de dependencias)
+        self.kernel = kernel
         self.context: ExecutionContext | None = None
 
-    # =====================================================
-    # Execute Workflow
-    # =====================================================
-    def execute(self, workflow: dict, context: ExecutionContext):
+    def execute(self, workflow: dict, context: ExecutionContext, enable_profiling: bool = False):
 
-        # Context viene desde fuera → SSOT real
         self.context = context
-
         steps = workflow.get("steps", [])
+        pipeline_start = time.perf_counter()
+        self.context.start_pipeline(len(steps), profiling_enabled=enable_profiling)
 
-        print("\n--- EXECUTION START ---")
+        print("\n--- [OS] EXECUTION PIPELINE START ---")
 
-        # dict → RuntimeStep ABI
         for step_data in steps:
             step = RuntimeStep(step_data)
-            self._execute_step(step)
+            self._execute_step_step_lifecycle(step)
 
-        print("\n--- FINAL CONTEXT STATE ---")
-        print(self.context.dump())
+        if enable_profiling:
+            pipeline_duration_ms = (time.perf_counter() - pipeline_start) * 1000
+            self.context.set_pipeline_profile(pipeline_duration_ms)
+            self.context.set_kernel_cache_metrics(self.kernel.cache_stats())
 
-        print("\n--- EXECUTION END ---")
+        self.context.finish_pipeline()
+        print("\n--- [OS] EXECUTION PIPELINE END ---")
 
-    # =====================================================
-    # Step Orchestrator
-    # =====================================================
-    def _execute_step(self, step: RuntimeStep):
+    async def execute_async(self, workflow: dict, context: ExecutionContext, enable_profiling: bool = False):
+        self.context = context
+        steps = workflow.get("steps", [])
+        pipeline_start = time.perf_counter()
+        self.context.start_pipeline(len(steps), profiling_enabled=enable_profiling)
 
-        print(f"[RUNTIME STEP] capability={step.capability} | action={step.action}")
+        print("\n--- [OS] EXECUTION PIPELINE START ---")
 
-        handler = self._resolve_handler(step)
+        for step_data in steps:
+            step = RuntimeStep(step_data)
+            await self._execute_step_step_lifecycle_async(step)
 
-        if not handler:
-            print(f"[UNKNOWN STEP] {step.action}")
-            return
+        if enable_profiling:
+            pipeline_duration_ms = (time.perf_counter() - pipeline_start) * 1000
+            self.context.set_pipeline_profile(pipeline_duration_ms)
+            self.context.set_kernel_cache_metrics(self.kernel.cache_stats())
 
-        self._run_step(handler, step)
+        self.context.finish_pipeline()
+        print("\n--- [OS] EXECUTION PIPELINE END ---")
 
-    # =====================================================
-    # Capability Resolver (PURE OS)
-    # =====================================================
-    def _resolve_handler(self, step: RuntimeStep):
+    def _posture_block_reason(self, step: RuntimeStep) -> str | None:
+        posture = self.context.get_runtime("execution_posture", {})
 
-        handler = None
+        restricted = posture.get("restricted_capabilities", [])
+        allowed = posture.get("allowed_actions", [])
 
-        # 1️⃣ capability.action (OS native)
-        if step.capability_key():
-            handler = self._step_registry.get(step.capability_key())
+        for namespace in restricted:
+            prefix = namespace.replace(".*", "")
+            if step.capability and step.capability.startswith(prefix):
+                return f"Capability '{step.capability}' restricted by posture"
 
-        # 2️⃣ fallback → action only
-        if not handler and step.legacy_key():
-            handler = self._step_registry.get(step.legacy_key())
+        if allowed and step.action not in allowed:
+            return f"Action '{step.action}' not allowed by posture"
 
-        return handler
+        return None
 
-    # =====================================================
-    # Step Lifecycle Runner
-    # =====================================================
-    def _run_step(self, handler, step: RuntimeStep):
+    def _execute_step_step_lifecycle(self, step: RuntimeStep):
+        step_start = time.perf_counter()
 
-        # Runtime awareness
+        # 1. Preparación de Contexto
         self.context.set_runtime("current_step", step.to_dict())
-
-        # Lifecycle start
+        
+        # 2. Telemetría de Inicio
         self.context._log_event("STEP_STARTED", {
             "capability": step.capability,
             "action": step.action
         })
 
-        # Execute capability
-        self.kernel.execute(step, self.context)
+        print(f"[RUNTIME STEP] capability={step.capability} | action={step.action}")
+        print(f"[RUNTIME] Calling Kernel -> {step.capability_key() or step.action}")
 
-        # Lifecycle end
-        self.context._log_event("STEP_FINISHED", {
+        block_reason = self._posture_block_reason(step)
+        if block_reason:
+            duration_ms = (time.perf_counter() - step_start) * 1000
+            self.context._log_event("STEP_BLOCKED_BY_POSTURE", {
+                "capability": step.capability,
+                "action": step.action,
+                "reason": block_reason,
+            })
+            self.context.record_step_failure(
+                step.capability or "unknown",
+                step.action or "unknown",
+                duration_ms,
+                block_reason
+            )
+            print(f"[RUNTIME BLOCKED] {block_reason}")
+            self.context._log_event("STEP_FINISHED", {"action": step.action})
+            return
+        
+        # 3. Transferencia de Control al Kernel (Ring 0)
+        try:
+            self.kernel.execute(step, self.context)
+        except Exception as e:
+            duration_ms = (time.perf_counter() - step_start) * 1000
+            self.context._log_event("STEP_CRITICAL_FAILURE", {"error": str(e)})
+            self.context.record_step_failure(
+                step.capability or "unknown",
+                step.action or "unknown",
+                duration_ms,
+                str(e)
+            )
+            print(f"[RUNTIME ERROR] {e}")
+        else:
+            duration_ms = (time.perf_counter() - step_start) * 1000
+            self.context.record_step_success(
+                step.capability or "unknown",
+                step.action or "unknown",
+                duration_ms
+            )
+
+        # 4. Telemetría de Cierre
+        self.context._log_event("STEP_FINISHED", {"action": step.action})
+
+    async def _execute_step_step_lifecycle_async(self, step: RuntimeStep):
+        step_start = time.perf_counter()
+
+        self.context.set_runtime("current_step", step.to_dict())
+        self.context._log_event("STEP_STARTED", {
             "capability": step.capability,
             "action": step.action
         })
+
+        print(f"[RUNTIME STEP] capability={step.capability} | action={step.action}")
+        print(f"[RUNTIME] Calling Kernel -> {step.capability_key() or step.action}")
+
+        block_reason = self._posture_block_reason(step)
+        if block_reason:
+            duration_ms = (time.perf_counter() - step_start) * 1000
+            self.context._log_event("STEP_BLOCKED_BY_POSTURE", {
+                "capability": step.capability,
+                "action": step.action,
+                "reason": block_reason,
+            })
+            self.context.record_step_failure(
+                step.capability or "unknown",
+                step.action or "unknown",
+                duration_ms,
+                block_reason
+            )
+            print(f"[RUNTIME BLOCKED] {block_reason}")
+            self.context._log_event("STEP_FINISHED", {"action": step.action})
+            return
+
+        try:
+            await self.kernel.execute_async(step, self.context)
+        except Exception as e:
+            duration_ms = (time.perf_counter() - step_start) * 1000
+            self.context._log_event("STEP_CRITICAL_FAILURE", {"error": str(e)})
+            self.context.record_step_failure(
+                step.capability or "unknown",
+                step.action or "unknown",
+                duration_ms,
+                str(e)
+            )
+            print(f"[RUNTIME ERROR] {e}")
+        else:
+            duration_ms = (time.perf_counter() - step_start) * 1000
+            self.context.record_step_success(
+                step.capability or "unknown",
+                step.action or "unknown",
+                duration_ms
+            )
+
+        self.context._log_event("STEP_FINISHED", {"action": step.action})

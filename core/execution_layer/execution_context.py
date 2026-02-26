@@ -20,7 +20,26 @@ class ExecutionContext:
             "behavior": {},
             "memory": {},     # 🔥 antes "execution"
             "artifacts": {},
-            "runtime": {}
+            "runtime": {},
+            "metrics": {
+                "total_steps": 0,
+                "successful_steps": 0,
+                "failed_steps": 0,
+                "step_durations_ms": [],
+                "capability_invocations": {},
+                "last_error": None,
+                "profiling": {
+                    "enabled": False,
+                    "pipeline_duration_ms": 0.0,
+                    "avg_step_duration_ms": 0.0,
+                    "slowest_step": None,
+                },
+                "kernel_cache": {
+                    "hits": 0,
+                    "misses": 0,
+                    "size": 0,
+                },
+            }
         }
 
         # -------------------------
@@ -64,6 +83,101 @@ class ExecutionContext:
 
     def get_runtime(self, key, default=None):
         return self._state["runtime"].get(key, default)
+
+    # =====================================================
+    # METRICS
+    # =====================================================
+
+    def start_pipeline(self, total_steps: int, profiling_enabled: bool = False):
+        metrics = self._state["metrics"]
+        metrics["total_steps"] = total_steps
+        metrics["successful_steps"] = 0
+        metrics["failed_steps"] = 0
+        metrics["step_durations_ms"] = []
+        metrics["capability_invocations"] = {}
+        metrics["last_error"] = None
+        metrics["profiling"] = {
+            "enabled": profiling_enabled,
+            "pipeline_duration_ms": 0.0,
+            "avg_step_duration_ms": 0.0,
+            "slowest_step": None,
+        }
+        metrics["kernel_cache"] = {
+            "hits": 0,
+            "misses": 0,
+            "size": 0,
+        }
+        self._log_event("PIPELINE_STARTED", {
+            "total_steps": total_steps,
+            "profiling_enabled": profiling_enabled,
+        })
+
+    def record_step_success(self, capability: str, action: str, duration_ms: float):
+        metrics = self._state["metrics"]
+        metrics["successful_steps"] += 1
+        metrics["step_durations_ms"].append({
+            "capability": capability,
+            "action": action,
+            "status": "success",
+            "duration_ms": round(duration_ms, 3),
+        })
+        metrics["capability_invocations"][capability] = (
+            metrics["capability_invocations"].get(capability, 0) + 1
+        )
+
+    def record_step_failure(self, capability: str, action: str, duration_ms: float, error: str):
+        metrics = self._state["metrics"]
+        metrics["failed_steps"] += 1
+        metrics["last_error"] = error
+        metrics["step_durations_ms"].append({
+            "capability": capability,
+            "action": action,
+            "status": "failed",
+            "duration_ms": round(duration_ms, 3),
+            "error": error,
+        })
+        metrics["capability_invocations"][capability] = (
+            metrics["capability_invocations"].get(capability, 0) + 1
+        )
+
+    def finish_pipeline(self):
+        metrics = self._state["metrics"]
+        self._log_event("PIPELINE_FINISHED", {
+            "total_steps": metrics["total_steps"],
+            "successful_steps": metrics["successful_steps"],
+            "failed_steps": metrics["failed_steps"],
+        })
+
+    def set_pipeline_profile(self, pipeline_duration_ms: float):
+        metrics = self._state["metrics"]
+        durations = metrics.get("step_durations_ms", [])
+
+        slowest_step = None
+        if durations:
+            slowest_step = max(durations, key=lambda item: item.get("duration_ms", 0.0))
+
+        avg_duration = 0.0
+        if durations:
+            total = sum(item.get("duration_ms", 0.0) for item in durations)
+            avg_duration = round(total / len(durations), 3)
+
+        metrics["profiling"] = {
+            "enabled": True,
+            "pipeline_duration_ms": round(pipeline_duration_ms, 3),
+            "avg_step_duration_ms": avg_duration,
+            "slowest_step": slowest_step,
+        }
+
+    def set_kernel_cache_metrics(self, cache_metrics: dict):
+        metrics = self._state["metrics"]
+        metrics["kernel_cache"] = {
+            "hits": int(cache_metrics.get("hits", 0)),
+            "misses": int(cache_metrics.get("misses", 0)),
+            "size": int(cache_metrics.get("size", 0)),
+        }
+
+    def metrics(self):
+        return dict(self._state["metrics"])
 
     # =====================================================
     # ARTIFACTS

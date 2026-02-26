@@ -1,8 +1,3 @@
-from matplotlib.style import context
-
-from core import action
-
-
 class BaseCapability:
 
     namespace = None  # ej: "content"
@@ -15,10 +10,17 @@ class BaseCapability:
     # -------------------------------------------------
     def resolve_action(self, action: str):
 
+        # OS-native capability key
+        namespace_key = f"{self.namespace}.{action}"
+        handler = self.registry.get(namespace_key)
+
+        if handler:
+            return handler
+
         # Namespace → module mapping (OS layer)
         namespace_module_map = {
-            "content": "script_action",
-            "publishing": "publish_action",
+            "content": "content_generate_script",
+            "publishing": "publishing_prepare_publish",
             "media": "media_action",
             "analytics": "analytics_action",
         }

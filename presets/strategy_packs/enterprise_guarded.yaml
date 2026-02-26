@@ -1,0 +1,17 @@
+name: enterprise_guarded
+version: 1.0.0
+
+autonomy: low
+
+restricted_capabilities:
+  - media.*
+  - publishing.*
+
+allowed_actions:
+  - generate_script
+  - analyze_metrics
+
+workflow_profile_defaults:
+  media_generation: disabled
+  publishing: disabled
+  analytics_feedback: enabled

@@ -1,0 +1,13 @@
+name: marketing_pipeline
+version: 1.0.0
+
+autonomy: high
+
+restricted_capabilities: []
+
+allowed_actions: []
+
+workflow_profile:
+  media_generation: enabled
+  publishing: required
+  analytics_feedback: enabled

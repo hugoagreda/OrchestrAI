@@ -1,2 +1,33 @@
-steps:
-  - name: generate_content
+strategies:
+
+  default:
+    steps:
+      - name: generate_script
+        role: scriptwriter
+        payload:
+          topic: "generic content"
+          tone: "natural"
+      - name: generate_media
+        role: media
+        payload:
+          style: "default"
+      - name: prepare_publish
+        role: publisher
+        payload:
+          platform: "generic"
+      - name: analyze_metrics
+        role: analytics
+        payload:
+          source: "runtime"
+
+  low_autonomy:
+    steps:
+      - name: generate_script
+        role: scriptwriter
+        payload:
+          topic: "generic low autonomy content"
+          tone: "neutral"
+      - name: prepare_publish
+        role: publisher
+        payload:
+          platform: "generic"

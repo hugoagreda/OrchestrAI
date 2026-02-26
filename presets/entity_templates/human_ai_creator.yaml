@@ -2,7 +2,7 @@ id: human_ai_creator
 entity_type: ai_creator
 
 # 🔥 NUEVO — Entity OS Profile
-strategy_pack: creator_low_autonomy
+strategy_pack: enterprise_guarded
 
 # -----------------------
 # IDENTITY LAYER
