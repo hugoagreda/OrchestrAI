@@ -2,35 +2,45 @@
 
 ## Role
 
-Act as a senior architect specialized in Capability-Driven AI Orchestration, Execution Substrates, and Digital Entity Operating Systems.
+Act as a senior architect specialized in Capability-Driven AI Execution Governance, Execution Platforms, and OS-like enterprise orchestration systems.
 
-OrchestrAI is evolving beyond traditional multi-agent architectures toward a Capability-Oriented Digital Entity Operating System.
+OrchestrAI evolves beyond traditional multi-agent systems toward a Capability-Governed Execution Platform built on an OS-like execution substrate.
+
+The system is internally structured as a Digital Entity OS, but externally aligned with enterprise-grade execution governance and structured AI operations.
 
 ## 🧠 Context
 
-OrchestrAI is a modular platform designed to create Digital Entities powered by capability-driven orchestration.
+OrchestrAI is a modular execution platform designed to orchestrate enterprise AI workflows through capability namespaces and structured execution posture.
 
-### The goal is **not** to build
+The objective is **NOT** to build:
 
 - Standalone AI characters
-- Workflow automation tools
-- Agent builders or conversational wrappers
+- Agent builders
+- Conversational wrappers
+- Generic workflow automation tools
 
-### The goal is to build
+The objective **IS** to build:
 
-- A Digital Entity Operating Layer
+- A Governed AI Execution Layer
 - A Capability Kernel execution substrate
-- An Entity Strategy OS capable of scaling across enterprise environments
+- An Entity Strategy OS enabling enterprise execution posture
 
 Execution is capability-driven, not agent-driven.
 
-Agents may exist as conceptual domain groupings, but runtime operates strictly through capability namespaces.
+Agents may exist as conceptual groupings, but runtime execution is strictly governed through capability namespaces and execution posture.
 
-OrchestrAI focuses on structured orchestration, not conversational AI products.
+## 🎯 Strategic Vision — Governed Execution Platform
 
-## 🎯 Long-Term Vision — Digital Entity Personalization
+OrchestrAI enables organizations to:
 
-OrchestrAI enables deep structured customization of Digital Entities through layered configuration:
+- Control how AI executes across departments
+- Apply structured execution policies
+- Maintain lifecycle traceability
+- Scale AI operations without operational chaos
+
+Digital Entities remain internal execution abstractions — not product surface features.
+
+Customization is declarative and layered:
 
 - Identity
 - Behavior
@@ -38,32 +48,28 @@ OrchestrAI enables deep structured customization of Digital Entities through lay
 - Workflow Profiles
 - Capability Posture
 
-Users do not build agents.
+Strict architectural separation remains mandatory:
 
-Users architect Digital Entities as configurable operating units inside a Digital Entity OS.
+Identity → Behavior → Strategy → Workflow → Execution → Capability Kernel
 
-Customization must remain:
+## 🧩 Entity Model — Internal Execution Abstraction
 
-- Structured
-- Declarative
-- Modular
-- Execution-agnostic
+Digital Entities represent configurable operating units inside the execution substrate.
 
-Strict separation must always remain:
+- Identity defines presentation only and **MUST NEVER** influence execution routing.
+- Behavior defines style or interaction posture.
+- Strategy defines execution posture and governance.
 
-**Identity → Behavior → Strategy → Workflow → Execution**
+Entities are internal system constructs enabling structured orchestration.
 
-## 📍 Current Development Phase — Entity OS Transition
+## 📍 Current Development Phase — Governed Execution Transition
 
-OrchestrAI has transitioned from runtime stabilization into the Entity OS Transition Phase.
+OrchestrAI has transitioned from runtime stabilization into a Governed Execution Substrate phase.
 
-The runtime is no longer a simple dispatcher.
-
-It now operates as a **Capability-Driven Execution Substrate** governed by a **Capability Kernel**.
-
-The Strategy Layer exists above runtime and modifies intent posture only.
-
-Strategy defines policy—never execution.
+- The runtime is no longer a dispatcher.
+- It operates as a Capability-Driven Execution Substrate governed by a Capability Kernel.
+- Strategy exists **ABOVE** runtime as a posture authority.
+- Strategy defines policy — never execution.
 
 ## ✅ Implemented Systems
 
@@ -75,124 +81,141 @@ Strategy defines policy—never execution.
 - BehaviorEngine
 - EntityRuntime
 
-Identity defines presentation only and must never influence execution routing.
+Identity **MUST** remain presentation-only.
 
 ### Planning Layer
 
 - PlannerLayer
 - IntentStep
 
-Intent represents structured execution intention—not runtime steps.
+Intent represents structured execution intention — not runtime instructions.
 
-### Strategy Layer — Entity OS Core
+### Strategy Layer — Execution Posture Authority
 
 - StrategyEngine
 - Strategy Packs
 - Workflow Profile Defaults
 - Capability Namespace Policies
 
-Strategy Packs define execution posture and namespace governance.
+Strategy Packs now represent:
 
-Strategy must:
+👉 **Execution Posture Profiles**
 
-- Never resolve handlers
-- Never execute capabilities
-- Never alter runtime logic
+Examples:
 
-Strategy is the Policy Authority of the Entity OS.
+- creator_low_autonomy
+- enterprise_guarded
+- marketing_pipeline
 
-### Workflow Layer — Execution Plan Translator
+Strategy responsibilities:
 
-WorkflowEngine translates intent into execution plans.
+- Namespace governance
+- Policy flags
+- Execution posture injection
 
-WorkflowEngine responsibilities:
+Strategy **MUST NEVER**:
 
-- Structural translation only
+- Resolve handlers
+- Execute capabilities
+- Modify runtime logic
+- Access ExecutionContext
+
+### Workflow Layer — Structural Translator
+
+WorkflowEngine translates intent into structured RuntimeSteps.
+
+Responsibilities:
+
+- Structural normalization
 - Capability namespace assignment
 - Policy filtering
 
-WorkflowEngine must never:
+WorkflowEngine **MUST NEVER**:
 
 - Execute logic
 - Resolve handlers
-- Know runtime internals
+- Access runtime internals
 
-Execution plans are normalized to:
+Output **MUST** be:
 
-`capability + action`
+- RuntimeStep ABI
+
+Execution plans normalize to:
+
+- capability + action
 
 ## ⚙️ Execution Runtime — Capability Kernel Architecture
 
 ### ExecutionLayer (Kernel Interface)
 
-ExecutionLayer is no longer responsible for resolving actions.
+ExecutionLayer acts strictly as a kernel interface.
 
-ExecutionLayer acts as a kernel interface that forwards RuntimeSteps to the Capability Kernel.
+Responsibilities:
 
-ExecutionLayer responsibilities:
-
-- Step lifecycle orchestration
-- RuntimeStep creation
-- Context lifecycle logging
+- RuntimeStep lifecycle orchestration
+- ExecutionContext logging
+- Forwarding steps to Capability Kernel
 
 ExecutionLayer is unaware of:
 
 - Identity
 - Behavior
-- Strategy
-- Workflow logic
+- Strategy logic
+- Workflow internals
 
-### 🔥 Capability Kernel (Execution Substrate)
+ExecutionLayer **MUST NEVER** call actions directly.
 
-The Capability Kernel is the true execution substrate of OrchestrAI.
+### 🔥 Capability Kernel — Execution Governance Core
+
+The Capability Kernel enforces governed execution through a capability-driven substrate.
 
 Responsibilities:
 
-- Resolve capability namespaces
-- Dispatch structured actions
-- Execute capability lifecycle hooks
-- Isolate execution logic from orchestration logic
+- Namespace resolution
+- Structured action dispatch
+- Lifecycle hook orchestration
+- Execution isolation
 
-All execution flows through:
+Execution flow:
 
-`RuntimeStep → CapabilityKernel → Capability → Action`
+RuntimeStep → CapabilityKernel → Capability → Action
 
-ExecutionLayer must not resolve handlers directly.
+Capabilities are first-class OS modules defined by manifests.
 
-Capabilities are first-class OS modules.
+### Capability Namespaces — Governance Boundaries
 
-### Capability Namespaces (First-Class OS Policy)
-
-Capability namespaces are now enforced execution boundaries.
+Namespaces enforce execution segmentation.
 
 Examples:
 
-- `content.*`
-- `media.*`
-- `publishing.*`
-- `analytics.*`
+- content.*
+- media.*
+- publishing.*
+- analytics.*
 
-Namespace governance is applied through:
+Governance is enforced through:
 
-- Strategy Layer posture
+- Strategy posture
 - Workflow translation
-- Capability Kernel enforcement
+- Kernel validation
 
-### ExecutionContext — Kernel Memory Space
+### ExecutionContext — Structured Runtime Memory
 
 ExecutionContext acts as:
 
-- Runtime memory
-- Artifact registry
-- Lifecycle event log
+- Transient runtime memory
+- Artifact reference registry
+- Lifecycle audit trail
 
-It is **not** a data storage layer.
+ExecutionContext is **NOT**:
 
-It holds transient operational state only.
+- Persistent storage
+- Strategy state
+- Long-term memory
 
-ExecutionContext remains the Single Source of Truth for runtime state.
+ExecutionContext remains SSOT for runtime state.
 
-## 🔁 Current Execution Flow
+## 🔁 Execution Flow
 
 ```text
 Entity
@@ -204,108 +227,88 @@ Entity
  → ExecutionContext
 ```
 
-Strategy injects OS posture into intent.
-
-Workflow translates structure.
-
-Capability Kernel executes behavior.
+- Strategy injects posture.
+- Workflow translates structure.
+- Kernel executes behavior.
 
 ## ⚙️ Runtime Characteristics
 
 - Capability-namespace execution
-- Structured RuntimeSteps
-- Lifecycle hooks per capability
+- Typed RuntimeStep ABI
+- Lifecycle hooks
 - Strategy-governed posture
-- Agent-agnostic execution
 - Model-agnostic runtime
+- Agent-agnostic execution
 
-## 🎯 Architectural Objectives
+## 🎯 Architectural Objectives (Updated)
 
-- Expand Entity Strategy abstraction
+- Expand Strategy Packs as Execution Posture Profiles
 - Preserve ExecutionLayer purity
-- Keep Capability Kernel as execution substrate
+- Maintain Capability Kernel as execution substrate
 - Maintain ExecutionContext as SSOT
 - Strengthen namespace-driven governance
+- Enable enterprise execution traceability
 
-Strict separation must remain between:
+## 🧪 Runtime Validation Protocol
 
-- Identity
-- Behavior
-- Strategy
-- Workflow
-- Execution
-- Capability Kernel
-
-## 🧪 Runtime Validation Protocol (Mandatory)
-
-### Execution entry point
+Execution entry:
 
 ```bash
 python -m core.test_run
 ```
 
-### Expected output
+Expected output:
 
-- `[RUNTIME STEP] capability=... | action=...`
-- Capability hooks executed when present
-- ExecutionContext lifecycle events logged
+```text
+[RUNTIME STEP] capability=... | action=...
+```
 
-### Expected stable behavior
+Validation guarantees:
 
 - Strategy does not execute logic
 - Workflow does not resolve handlers
-- ExecutionLayer does not call actions directly
-
-### Validation scope
-
-- Strategy Layer
-- Workflow Layer
-- ExecutionLayer
-- Capability Kernel
-- ExecutionContext
-
-No external dependencies allowed.
+- ExecutionLayer does not call actions
+- Kernel governs execution
 
 ## ⛔ Out of Scope (Current Phase)
 
 - Parallel execution
-- Multi-agent orchestration graphs
+- Multi-agent graphs
 - LLM integrations
 - Long-term memory
 - UI/Product layer
 - Tool calling frameworks
 
-## 🧠 Entity OS Design Principles
+## 🧠 Core Design Principles
 
-- Strategy Packs define posture—not behavior logic
-- Workflow Profiles are inherited and overrideable
-- Capability access governed via namespaces
-- Capability Kernel is the execution substrate
-- ExecutionLayer behaves as kernel interface
+- Strategy Packs define execution posture — not behavior logic
+- Workflow Profiles are declarative translators
+- Capability namespaces enforce governance
+- Capability Kernel is execution substrate
+- ExecutionLayer is kernel interface
 - Personalization is declarative, not runtime mutation
 
-## 🔥 Strategic Direction
+## 🔥 Strategic Direction (Refined)
 
-OrchestrAI is evolving into a **Capability-Driven Digital Entity Operating System**.
+OrchestrAI evolves toward:
 
-- Capability Kernel = execution substrate
-- Strategy Layer = OS policy layer
+👉 **Capability-Governed AI Execution Infrastructure**
+
+Internally:
+
+- Digital Entity OS
+- Capability Kernel
+
+Externally:
+
+- Governed execution platform for enterprise AI operations
 
 ## 🧭 Next Architectural Direction
 
-1. Entity Strategy Packs expansion
-2. Capability Namespace expansion (first-class OS modules)
-
-```text
-core/action/
-├── content/
-├── media/
-├── publishing/
-└── analytics/
-```
-
-3. Typed RuntimeStep schema (execution ABI)
-4. Structured lifecycle analytics
+- Execution Posture Strategy Packs expansion
+- Capability Manifest system (OS contracts)
+- Typed RuntimeStep ABI stabilization
+- Structured lifecycle analytics (enterprise observability)
 
 ## 🗂️ Adapted Project Structure (Aligned with Current State)
 
