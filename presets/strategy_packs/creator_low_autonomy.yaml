@@ -22,3 +22,12 @@ intent_modifiers:
 workflow_profile_defaults:
   publishing: optional
   analytics_feedback: enabled
+
+model_policy:
+  content.generate_script:
+    provider: anthropic
+    model: claude-3-haiku
+
+  media.*:
+    provider: openai
+    model: gpt-4o-mini

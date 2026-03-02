@@ -1,6 +1,17 @@
 class RuntimeStep:
 
-    def __init__(self, data: dict):
+    def __init__(self, data_or_capability, action=None, payload=None, metadata=None, strategy=None):
+
+        if isinstance(data_or_capability, dict):
+            data = data_or_capability
+        else:
+            data = {
+                "capability": data_or_capability,
+                "action": action,
+                "payload": payload or {},
+                "metadata": metadata or {},
+                "strategy": strategy or {},
+            }
 
         # -------------------------------------------------
         # OS-Native Fields

@@ -369,98 +369,101 @@ Externally:
 
 ```text
 OrchestrAI/
-├── .env.example
-├── clase.py
 ├── README.md
 ├── requirements.txt
-│
 ├── core/
 │   ├── __init__.py
 │   ├── config.py
 │   ├── pipeline.py
 │   ├── test_run.py
-│   │
+│   ├── __pycache__/
 │   ├── action/
+│   │   ├── __init__.py
 │   │   ├── action_registry.py
 │   │   ├── capability_base.py
 │   │   ├── capability_kernel.py
 │   │   ├── content_generate_script.py
 │   │   ├── media_action.py
+│   │   ├── model_router.py
 │   │   ├── publishing_prepare_publish.py
+│   │   ├── __pycache__/
 │   │   ├── analytics/
 │   │   │   ├── __init__.py
 │   │   │   ├── analytics_actions.py
-│   │   │   └── capability.yaml
+│   │   │   ├── capability.yaml
+│   │   │   └── __pycache__/
 │   │   ├── content/
 │   │   │   ├── __init__.py
 │   │   │   ├── capability.yaml
 │   │   │   ├── content_actions.py
-│   │   │   └── manifest.yaml
+│   │   │   ├── manifest.yaml
+│   │   │   └── __pycache__/
 │   │   ├── media/
 │   │   │   ├── __init__.py
 │   │   │   ├── capability.yaml
-│   │   │   └── media_actions.py
-│   │   ├── publishing/
-│   │   │   ├── __init__.py
-│   │   │   ├── capability.yaml
-│   │   │   └── publishing_actions.py
-│   │   └── __init__.py
-│   │
+│   │   │   ├── media_actions.py
+│   │   │   └── __pycache__/
+│   │   └── publishing/
+│   │       ├── __init__.py
+│   │       ├── capability.yaml
+│   │       ├── publishing_actions.py
+│   │       └── __pycache__/
 │   ├── behavior_engine/
 │   │   ├── __init__.py
-│   │   └── behavior_engine.py
-│   │
+│   │   ├── behavior_engine.py
+│   │   └── __pycache__/
 │   ├── entity_engine/
 │   │   ├── __init__.py
 │   │   ├── entity_builder.py
-│   │   └── entity_runtime.py
-│   │
+│   │   ├── entity_runtime.py
+│   │   └── __pycache__/
 │   ├── execution_layer/
 │   │   ├── __init__.py
 │   │   ├── execution_context.py
 │   │   ├── execution_layer.py
-│   │   └── runtime_step.py
-│   │
+│   │   ├── runtime_step.py
+│   │   └── __pycache__/
 │   ├── identity_engine/
 │   │   ├── __init__.py
-│   │   └── identity_engine.py
-│   │
+│   │   ├── identity_engine.py
+│   │   └── __pycache__/
 │   ├── planner_layer/
 │   │   ├── __init__.py
 │   │   ├── intent_step.py
-│   │   └── planner_layer.py
-│   │
+│   │   ├── planner_layer.py
+│   │   └── __pycache__/
 │   ├── strategy_engine/
 │   │   ├── __init__.py
-│   │   └── strategy_engine.py
-│   │
+│   │   ├── strategy_engine.py
+│   │   └── __pycache__/
 │   ├── tests/
 │   │   ├── __init__.py
+│   │   ├── posture_enforcemente.py
 │   │   ├── test_capability_kernel.py
 │   │   ├── test_execution_context.py
 │   │   ├── test_execution_layer.py
+│   │   ├── test_model_router.py
 │   │   ├── test_runtime_step.py
 │   │   ├── test_strategy_engine.py
-│   │   └── test_workflow_engine.py
-│   │
+│   │   ├── test_workflow_engine.py
+│   │   └── __pycache__/
 │   └── workflow_engine/
 │       ├── __init__.py
-│       └── workflow_engine.py
-│
+│       ├── workflow_engine.py
+│       └── __pycache__/
 ├── presets/
 │   ├── entity_templates/
 │   │   └── human_ai_creator.yaml
-│   │
 │   ├── strategy_packs/
-│   │   └── creator_low_autonomy.yaml
-│   │
+│   │   ├── analytics_readonly.yaml
+│   │   ├── creator_low_autonomy.yaml
+│   │   ├── enterprise_guarded.yaml
+│   │   └── marketing_pipeline.yaml
 │   └── workflows/
 │       ├── generic.yaml
 │       └── short_video.yaml
-│
 ├── prompts/
 │   └── system_architect.md
-│
 └── storage/
     ├── assets/
     └── metrics/

@@ -21,6 +21,7 @@ class ExecutionContext:
             "memory": {},     # 🔥 antes "execution"
             "artifacts": {},
             "runtime": {},
+            "model_decisions": [],
             "metrics": {
                 "total_steps": 0,
                 "successful_steps": 0,
@@ -59,6 +60,19 @@ class ExecutionContext:
         self._state["behavior"] = behavior_data or {}
         self._log_event("BEHAVIOR_LOADED", {})
 
+    def set_posture(self, posture: dict):
+        posture = posture or {}
+        self._state["runtime"]["posture"] = posture
+        self._state["runtime"]["execution_posture"] = posture
+
+    def get_posture(self) -> dict:
+        runtime = self._state["runtime"]
+
+        if "posture" in runtime:
+            return runtime["posture"]
+        
+        return runtime.get("execution_posture", {})
+    
     # =====================================================
     # MEMORY (capability outputs)
     # =====================================================
@@ -83,6 +97,13 @@ class ExecutionContext:
 
     def get_runtime(self, key, default=None):
         return self._state["runtime"].get(key, default)
+
+    def log_model_decision(self, decision: dict):
+        self._state["model_decisions"].append(decision or {})
+        self._log_event("MODEL_DECISION_LOGGED", {"decision": decision or {}})
+
+    def model_decisions(self):
+        return list(self._state["model_decisions"])
 
     # =====================================================
     # METRICS

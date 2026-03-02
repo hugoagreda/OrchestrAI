@@ -83,13 +83,7 @@ def main():
     strategy = StrategyEngine()
     strategized_intent = strategy.apply_strategy(intent, entity)
 
-    posture = {
-        "restricted_capabilities": strategized_intent.to_dict().get("restricted_capabilities", []),
-        "allowed_actions": strategized_intent.to_dict().get("allowed_actions", []),
-        "autonomy": strategized_intent.to_dict().get("autonomy"),
-    }
-
-    context.set_runtime("execution_posture", posture)
+    posture = strategy.inject_execution_posture(context, strategized_intent)
     
     print("\n[POSTURE SNAPSHOT INJECTED]")
     print(posture)

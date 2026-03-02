@@ -7,6 +7,10 @@ class ExecutionLayer:
         # La Layer recibe el Kernel ya configurado (Inyección de dependencias)
         self.kernel = kernel
         self.context: ExecutionContext | None = None
+        self.model_decisions = []
+
+    def log_model_decision(self, decision: dict):
+        self.model_decisions.append(decision)
 
     def execute(self, workflow: dict, context: ExecutionContext, enable_profiling: bool = False):
 
@@ -50,19 +54,19 @@ class ExecutionLayer:
         print("\n--- [OS] EXECUTION PIPELINE END ---")
 
     def _posture_block_reason(self, step: RuntimeStep) -> str | None:
-        posture = self.context.get_runtime("execution_posture", {})
-
+        posture = self.context.get_posture()
+    
         restricted = posture.get("restricted_capabilities", [])
         allowed = posture.get("allowed_actions", [])
-
+    
         for namespace in restricted:
             prefix = namespace.replace(".*", "")
             if step.capability and step.capability.startswith(prefix):
                 return f"Capability '{step.capability}' restricted by posture"
-
+    
         if allowed and step.action not in allowed:
             return f"Action '{step.action}' not allowed by posture"
-
+    
         return None
 
     def _execute_step_step_lifecycle(self, step: RuntimeStep):
