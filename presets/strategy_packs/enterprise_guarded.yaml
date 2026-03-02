@@ -1,26 +1,23 @@
-name: enterprise_guarded
+name: enterprise_premium
 version: 1.0.0
 
-autonomy: low
+autonomy: medium
 
 restricted_capabilities:
-  - media.*
   - publishing.*
 
 allowed_actions:
   - generate_script
   - analyze_metrics
 
-workflow_profile_defaults:
-  media_generation: disabled
-  publishing: disabled
-  analytics_feedback: enabled
-
 model_policy:
-  content.generate_script:
-    provider: anthropic
-    model: claude-3-haiku
+  content.*:
+    optimize_for:
+      quality: 0.8
+      cost: 0.1
+      latency: 0.1
 
   analytics.*:
-    provider: openai
-    model: gpt-4o-mini
+    optimize_for:
+      quality: 0.4
+      latency: 0.2

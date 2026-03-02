@@ -201,6 +201,7 @@ class CapabilityKernel:
             namespace=step.capability,
             action=step.action,
             posture=posture,
+            context=context,
         )
 
         context.log_model_decision(model_decision)
@@ -234,6 +235,7 @@ class CapabilityKernel:
             namespace=step.capability,
             action=step.action,
             posture=posture,
+            context=context,
         )
 
         context.log_model_decision(model_decision)

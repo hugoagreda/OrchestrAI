@@ -63,6 +63,8 @@ def main():
     context.load_identity(entity.get("identity"))
     context.load_behavior(entity.get("behavior"))
 
+    context.set_budget(6.0)
+
     print("[CONTEXT] Identity + Behavior hydrated")
 
     # =====================================================

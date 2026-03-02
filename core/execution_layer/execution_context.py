@@ -98,6 +98,30 @@ class ExecutionContext:
     def get_runtime(self, key, default=None):
         return self._state["runtime"].get(key, default)
 
+    def set_budget(self, total_budget: float):
+        total = float(total_budget)
+        self._state["runtime"]["budget"] = {
+            "total": total,
+            "remaining": total,
+            "spent": 0.0,
+        }
+
+    def get_budget(self) -> dict | None:
+        budget = self._state["runtime"].get("budget")
+        if isinstance(budget, dict):
+            return dict(budget)
+        return None
+
+    def consume_budget(self, amount: float):
+        budget = self._state["runtime"].get("budget")
+        if not isinstance(budget, dict):
+            return
+
+        spend = max(float(amount), 0.0)
+        budget["spent"] = float(budget.get("spent", 0.0)) + spend
+        remaining = float(budget.get("remaining", 0.0)) - spend
+        budget["remaining"] = max(remaining, 0.0)
+
     def log_model_decision(self, decision: dict):
         self._state["model_decisions"].append(decision or {})
         self._log_event("MODEL_DECISION_LOGGED", {"decision": decision or {}})
