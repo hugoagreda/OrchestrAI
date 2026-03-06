@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 class ModelRouter:
     """
-    Deterministic model router with policy and budget awareness.
+    Enrutador determinista de modelos con conciencia de política y presupuesto.
     """
 
     DEFAULT_DECISION = {

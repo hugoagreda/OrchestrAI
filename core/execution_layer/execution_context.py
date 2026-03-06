@@ -1,19 +1,19 @@
 class ExecutionContext:
     """
-    Kernel State Container.
+    Contenedor de Estado del Kernel.
 
-    Responsibilities:
-        - Identity hydration
-        - Behavior constraints
-        - Capability memory (runtime data)
-        - Artifact storage
-        - Lifecycle events
+    Responsabilidades:
+        - Hidratación de identidad
+        - Restricciones de comportamiento
+        - Memoria de capacidades (datos de runtime)
+        - Almacenamiento de artefactos
+        - Eventos de ciclo de vida
     """
 
     def __init__(self):
 
         # -------------------------
-        # CORE STATE (OS-native)
+        # ESTADO BASE (nativo del sistema)
         # -------------------------
         self._state = {
             "identity": {},
@@ -45,12 +45,12 @@ class ExecutionContext:
         }
 
         # -------------------------
-        # EVENT LOG
+        # REGISTRO DE EVENTOS
         # -------------------------
         self._events = []
 
     # =====================================================
-    # HYDRATION
+    # HIDRATACIÓN
     # =====================================================
 
     def load_identity(self, identity_data: dict):
@@ -75,13 +75,13 @@ class ExecutionContext:
         return runtime.get("execution_posture", {})
     
     # =====================================================
-    # MEMORY (capability outputs)
+    # MEMORIA (salidas de capacidades)
     # =====================================================
 
     def set(self, key, value):
         """
-        OS-native memory write.
-        Capabilities store runtime outputs here.
+        Escritura de memoria nativa.
+        Las capacidades guardan aquí sus salidas de runtime.
         """
         self._state["memory"][key] = value
         self._log_event("STATE_UPDATED", {key: value})
@@ -90,7 +90,7 @@ class ExecutionContext:
         return self._state["memory"].get(key, default)
 
     # =====================================================
-    # RUNTIME (kernel internal)
+    # RUNTIME (interno del kernel)
     # =====================================================
 
     def set_runtime(self, key, value):
@@ -139,7 +139,7 @@ class ExecutionContext:
         return list(self._state["execution_traces"])
 
     # =====================================================
-    # METRICS
+    # MÉTRICAS
     # =====================================================
 
     def start_pipeline(self, total_steps: int, profiling_enabled: bool = False):
@@ -235,7 +235,7 @@ class ExecutionContext:
         return dict(self._state["metrics"])
 
     # =====================================================
-    # ARTIFACTS
+    # ARTEFACTOS
     # =====================================================
 
     def store_artifact(self, name, value):
@@ -246,7 +246,7 @@ class ExecutionContext:
         return self._state["artifacts"].get(name, default)
 
     # =====================================================
-    # EVENTS
+    # EVENTOS
     # =====================================================
 
     def _log_event(self, event_type, payload=None):
@@ -259,7 +259,7 @@ class ExecutionContext:
         return list(self._events)
 
     # =====================================================
-    # DEBUG
+    # DEPURACIÓN
     # =====================================================
 
     def dump(self):

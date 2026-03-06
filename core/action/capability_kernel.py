@@ -33,17 +33,17 @@ class PayloadValidationError(CapabilityKernelError):
 
 class CapabilityKernel:
     """
-    Capability-Governed Execution Core.
+    Núcleo de Ejecución Gobernado por Capacidades.
 
-    Responsibilities:
-    - Manifest validation (boot-time)
-    - Namespace resolution
-    - Action dispatch
-    - Payload validation (pre-flight)
-    - Lifecycle hook orchestration
-    - Handler caching
-    - Sync + async execution
-    - Policy-level model routing (posture-aware)
+    Responsabilidades:
+    - Validación de manifiestos (en arranque)
+    - Resolución de namespaces
+    - Despacho de acciones
+    - Validación de payload (pre-ejecución)
+    - Orquestación de hooks de ciclo de vida
+    - Caché de handlers
+    - Ejecución síncrona y asíncrona
+    - Enrutamiento de modelos por política (posture-aware)
     """
 
     def __init__(self):
@@ -60,7 +60,7 @@ class CapabilityKernel:
         self.adapter_registry = ModelAdapterRegistry()
 
     # ------------------------------------------------------------------
-    # Cache Telemetry
+    # Telemetría de caché
     # ------------------------------------------------------------------
 
     def cache_stats(self) -> dict:
@@ -71,47 +71,47 @@ class CapabilityKernel:
         }
 
     # ------------------------------------------------------------------
-    # Boot & Manifest Validation
+    # Arranque y validación de manifiestos
     # ------------------------------------------------------------------
 
     def _validate_manifest(self, manifest_path: Path, config: dict) -> dict:
         if not isinstance(config, dict):
-            raise ManifestValidationError(f"Invalid manifest format: {manifest_path}")
+            raise ManifestValidationError(f"Formato de manifiesto inválido: {manifest_path}")
 
         namespace = config.get("namespace")
         if not isinstance(namespace, str) or not namespace.strip():
             raise ManifestValidationError(
-                f"Manifest missing valid namespace: {manifest_path}"
+                f"El manifiesto no define un namespace válido: {manifest_path}"
             )
 
         actions = config.get("actions")
         if not isinstance(actions, dict) or not actions:
             raise ManifestValidationError(
-                f"Manifest missing actions map: {manifest_path}"
+                f"El manifiesto no define mapa de acciones: {manifest_path}"
             )
 
         for action_name, action_config in actions.items():
             if not isinstance(action_config, dict):
                 raise ManifestValidationError(
-                    f"Action '{action_name}' config must be a map in {manifest_path}"
+                    f"La configuración de la acción '{action_name}' debe ser un mapa en {manifest_path}"
                 )
 
             handler = action_config.get("handler")
             if not isinstance(handler, str) or "." not in handler:
                 raise ManifestValidationError(
-                    f"Action '{action_name}' missing valid handler in {manifest_path}"
+                    f"La acción '{action_name}' no define un handler válido en {manifest_path}"
                 )
 
             required_payload = action_config.get("required_payload", [])
             if not isinstance(required_payload, list):
                 raise ManifestValidationError(
-                    f"Action '{action_name}' required_payload must be a list in {manifest_path}"
+                    f"La acción '{action_name}' debe definir required_payload como lista en {manifest_path}"
                 )
 
         return config
 
     def _boot_sequence(self):
-        print("\n[KERNEL BOOT] Loading capabilities...")
+        print("\n[KERNEL BOOT] Cargando capacidades...")
         boot_errors = []
 
         for manifest_path in self.base_path.glob("**/capability.yaml"):
@@ -135,11 +135,11 @@ class CapabilityKernel:
         if boot_errors:
             details = "\n".join(boot_errors)
             raise ManifestValidationError(
-                f"Kernel boot failed due to invalid manifests:\n{details}"
+                f"El arranque del kernel falló por manifiestos inválidos:\n{details}"
             )
 
     # ------------------------------------------------------------------
-    # Validation & Handler Resolution
+    # Validación y resolución de handlers
     # ------------------------------------------------------------------
 
     def _validate_payload(self, step, manifest: dict):
@@ -148,7 +148,7 @@ class CapabilityKernel:
 
         if missing:
             raise PayloadValidationError(
-                f"Missing required payload for "
+                f"Falta payload requerido para "
                 f"{step.capability}.{step.action}: {', '.join(missing)}"
             )
 
@@ -164,13 +164,13 @@ class CapabilityKernel:
         ns_info = self.manifests.get(step.capability)
         if not ns_info:
             raise NamespaceNotInstalledError(
-                f"Namespace '{step.capability}' not installed."
+                f"El namespace '{step.capability}' no está instalado."
             )
 
         action_config = ns_info["config"]["actions"].get(step.action)
         if not action_config:
             raise ActionNotFoundError(
-                f"Action '{step.action}' not found in namespace '{step.capability}'."
+                f"La acción '{step.action}' no existe en el namespace '{step.capability}'."
             )
 
         handler_path = action_config["handler"]
@@ -185,12 +185,12 @@ class CapabilityKernel:
 
         except Exception as e:
             raise HandlerResolutionError(
-                f"Could not import handler '{handler_path}' "
-                f"from '{full_module_path}': {e}"
+                f"No se pudo importar el handler '{handler_path}' "
+                f"desde '{full_module_path}': {e}"
             ) from e
 
     # ------------------------------------------------------------------
-    # Sync Execution
+    # Ejecución síncrona
     # ------------------------------------------------------------------
 
     def execute(self, step, context):
@@ -243,13 +243,13 @@ class CapabilityKernel:
             self._execute_handler(handler, step, context)
         except Exception as e:
             raise CapabilityKernelError(
-                f"Execution failed for {step.capability}.{step.action}: {e}"
+                f"La ejecución falló para {step.capability}.{step.action}: {e}"
             ) from e
         finally:
             self._run_lifecycle_hook(handler, "on_finish", step, context)
 
     # ------------------------------------------------------------------
-    # Async Execution
+    # Ejecución asíncrona
     # ------------------------------------------------------------------
 
     async def execute_async(self, step, context):
@@ -302,13 +302,13 @@ class CapabilityKernel:
             await self._execute_handler_async(handler, step, context)
         except Exception as e:
             raise CapabilityKernelError(
-                f"Execution failed for {step.capability}.{step.action}: {e}"
+                f"La ejecución falló para {step.capability}.{step.action}: {e}"
             ) from e
         finally:
             self._run_lifecycle_hook(handler, "on_finish", step, context)
 
     # ------------------------------------------------------------------
-    # Handler Invocation
+    # Invocación de handlers
     # ------------------------------------------------------------------
 
     def _execute_handler(self, handler, step, context):
@@ -316,8 +316,8 @@ class CapabilityKernel:
 
         if inspect.isawaitable(result):
             raise CapabilityKernelError(
-                f"Async handler returned awaitable in sync path for "
-                f"{step.capability}.{step.action}. Use execute_async()."
+                f"Un handler async devolvió un awaitable en la ruta síncrona para "
+                f"{step.capability}.{step.action}. Usa execute_async()."
             )
 
     async def _execute_handler_async(self, handler, step, context):
@@ -327,7 +327,7 @@ class CapabilityKernel:
             await result
 
     # ------------------------------------------------------------------
-    # Lifecycle Hooks
+    # Hooks de ciclo de vida
     # ------------------------------------------------------------------
 
     def _run_lifecycle_hook(self, handler, hook_name: str, step, context):
@@ -339,6 +339,6 @@ class CapabilityKernel:
                 hook(step, context)
             except Exception as e:
                 raise CapabilityKernelError(
-                    f"Lifecycle hook '{hook_name}' failed for "
+                    f"El hook de ciclo de vida '{hook_name}' falló para "
                     f"{step.capability}.{step.action}: {e}"
                 ) from e

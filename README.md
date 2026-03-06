@@ -1,25 +1,25 @@
-# OrchestrAI — AI Execution Optimization Engine
+# OrchestrAI — Motor de Optimización de Ejecución de IA
 
-OrchestrAI is a developer-facing API infrastructure that optimizes AI model execution across providers.
+OrchestrAI es una infraestructura API orientada a desarrolladores que optimiza la ejecución de modelos de IA entre múltiples proveedores.
 
-The system acts as an intelligent routing and governance layer between applications and model providers to make AI usage:
+El sistema actúa como una capa inteligente de enrutamiento y gobernanza entre aplicaciones y proveedores de modelos para que el uso de IA sea:
 
-- cheaper
-- easier to manage
-- provider-agnostic
-- observable and controllable
+- más barato
+- más fácil de gestionar
+- agnóstico al proveedor
+- observable y controlable
 
-## Core Value
+## Valor Principal
 
-OrchestrAI optimizes each execution based on:
+OrchestrAI optimiza cada ejecución en base a:
 
-- task classification
-- deterministic routing policies
-- compute budget signals
-- provider abstraction via adapters
-- structured execution traces
+- clasificación de tareas
+- políticas de enrutamiento deterministas
+- señales de presupuesto de cómputo
+- abstracción de proveedores mediante adaptadores
+- trazas de ejecución estructuradas
 
-## Supported Providers (initial)
+## Proveedores Soportados (inicial)
 
 - OpenAI
 - Anthropic
@@ -27,13 +27,13 @@ OrchestrAI optimizes each execution based on:
 - Mistral
 - OpenRouter
 
-Future support:
+Soporte futuro:
 
-- local models
-- enterprise/private endpoints
-- self-hosted models
+- modelos locales
+- endpoints privados/empresariales
+- modelos autoalojados
 
-## Architectural Layers
+## Capas Arquitectónicas
 
 - Identity
 - Behavior
@@ -44,45 +44,39 @@ Future support:
 - CapabilityNamespace
 - ExecutionContext
 
-Routing and execution governance live inside `CapabilityKernel`.
+El enrutamiento y la gobernanza de ejecución viven dentro de `CapabilityKernel`.
 
-## Minimal Runtime Flow
+## Flujo Mínimo de Runtime
 
-Application → OrchestrAI API → Task Classifier → Routing Engine → Policy/Budget Evaluation → Model Adapter → Model Provider → Execution Trace
+Aplicación → API de OrchestrAI → Clasificador de Tarea → Motor de Enrutamiento → Evaluación de Política/Presupuesto → Adaptador de Modelo → Proveedor de Modelo → Traza de Ejecución
 
-## Development Philosophy
+## Filosofía de Desarrollo
 
-Early versions prioritize:
+Las primeras versiones priorizan:
 
-- simplicity
-- modularity
-- traceability
-- low operational complexity
+- simplicidad
+- modularidad
+- trazabilidad
+- baja complejidad operativa
 
-Avoid over-engineering. Validate value first through automatic model routing and cost optimization.
+Evita la sobreingeniería. Primero valida valor con enrutamiento automático de modelos y optimización de costos.
 
-## Python Environment (venv)
+## Entorno Python (venv)
 
-Recommended setup (Windows):
-
-1. Create virtual environment:
-  - `py -m venv .venv`
-
-2. Activate it:
+1. Activar el venv:
   - PowerShell: `.\.venv\Scripts\Activate.ps1`
   - CMD: `.venv\Scripts\activate.bat`
 
-3. Install dependencies:
+2. Instalar dependencias:
   - `python -m pip install --upgrade pip`
   - `python -m pip install -r requirements.txt`
 
-4. Deactivate when done:
+3. Desactivar al terminar:
   - `deactivate`
 
+## Ejecución Local
 
-## Local Execution
-
-- Runtime smoke test:
+- Prueba rápida de runtime:
   - `python -m core.test_run`
-- Unit tests:
+- Pruebas unitarias:
   - `python -m unittest discover -s core/tests -p "test_*.py"`

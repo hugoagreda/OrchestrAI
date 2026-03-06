@@ -1,8 +1,8 @@
 class TaskClassifier:
     """
-    Lightweight deterministic classifier.
+    Clasificador determinista y ligero.
 
-    Keeps early-stage classification cheap and explainable.
+    Mantiene la clasificación en etapa temprana barata y explicable.
     """
 
     TASK_KEYWORDS = {
