@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 class ModelRouter:
     """
-    Policy-aware model resolver (minimal deterministic version).
+    Deterministic model router with policy and budget awareness.
     """
 
     DEFAULT_DECISION = {
@@ -18,9 +18,12 @@ class ModelRouter:
 
     MODEL_CATALOG = {
         "openai:gpt-4o-mini": {"cost": 1.0, "quality": 6.0, "latency": 3.0},
-        "openai:gpt-4o": {"cost": 5.0, "quality": 9.0, "latency": 5.0},
+        "openai:gpt-4.1": {"cost": 6.0, "quality": 9.0, "latency": 5.0},
         "anthropic:claude-3-haiku": {"cost": 2.0, "quality": 7.0, "latency": 4.0},
         "anthropic:claude-3-opus": {"cost": 8.0, "quality": 10.0, "latency": 6.0},
+        "google:gemini-2.0-flash": {"cost": 1.2, "quality": 7.0, "latency": 3.4},
+        "mistral:mistral-large": {"cost": 2.5, "quality": 8.0, "latency": 3.0},
+        "openrouter:openrouter/auto": {"cost": 2.0, "quality": 7.5, "latency": 3.5},
     }
 
     OBJECTIVE_METRIC = {
@@ -36,6 +39,8 @@ class ModelRouter:
     }
 
     OPTIMIZE_METRICS = ("cost", "quality", "latency")
+    SIMPLE_TASKS = {"summarization", "classification", "translation", "text_generation"}
+    COMPLEX_TASKS = {"coding", "analysis", "question_answering"}
 
     def _budget_ratio(self, context: "ExecutionContext | None") -> float | None:
         if context is None or not hasattr(context, "get_budget"):
@@ -57,34 +62,6 @@ class ModelRouter:
         remaining = float(remaining)
         return remaining / total
 
-    def _catalog_entries(self, remaining: float | None = None) -> list[dict]:
-        entries = []
-
-        for key, meta in self.MODEL_CATALOG.items():
-            if ":" not in key:
-                continue
-
-            provider, model = key.split(":", 1)
-            cost = meta.get("cost")
-            quality = meta.get("quality")
-            latency = meta.get("latency")
-
-            if cost is None or quality is None or latency is None:
-                continue
-
-            if remaining is not None and cost > remaining:
-                continue
-
-            entries.append({
-                "provider": provider,
-                "model": model,
-                "cost": cost,
-                "quality": quality,
-                "latency": latency,
-            })
-
-        return entries
-
     def _budget_remaining(self, context: "ExecutionContext | None") -> float | None:
         if context is None or not hasattr(context, "get_budget"):
             return None
@@ -99,17 +76,29 @@ class ModelRouter:
 
         return float(remaining)
 
-    def _budget_exceeded_decision(self, remaining: float | None) -> dict:
-        decision = {
-            "provider": "none",
-            "model": "none",
-            "reason": "budget_exceeded",
-        }
+    def _catalog_entries(self) -> list[dict]:
+        entries = []
+        for key, meta in self.MODEL_CATALOG.items():
+            if ":" not in key:
+                continue
 
-        if remaining is not None:
-            decision["budget_remaining"] = remaining
+            provider, model = key.split(":", 1)
+            cost = meta.get("cost")
+            quality = meta.get("quality")
+            latency = meta.get("latency")
 
-        return decision
+            if cost is None or quality is None or latency is None:
+                continue
+
+            entries.append({
+                "provider": provider,
+                "model": model,
+                "cost": float(cost),
+                "quality": float(quality),
+                "latency": float(latency),
+            })
+
+        return entries
 
     def _attach_budget_metadata(
         self,
@@ -131,100 +120,91 @@ class ModelRouter:
 
         return decision_with_budget
 
+    def _find_catalog_meta(self, provider: str, model: str) -> dict | None:
+        key = f"{provider}:{model}"
+        meta = self.MODEL_CATALOG.get(key)
+        if isinstance(meta, dict):
+            return meta
+        return None
+
     def _finalize_decision_with_budget(
         self,
         decision: dict,
         context: "ExecutionContext | None",
     ) -> dict:
+        decision_out = decision.copy()
+
+        provider = decision_out.get("provider")
+        model = decision_out.get("model")
+
+        if provider and model:
+            meta = self._find_catalog_meta(provider, model)
+            if isinstance(meta, dict):
+                decision_out["estimated_cost"] = meta.get("cost")
+                decision_out["estimated_latency"] = meta.get("latency")
+
         remaining = self._budget_remaining(context)
-        if remaining is None:
-            return decision
+        ratio = self._budget_ratio(context)
 
-        provider = decision.get("provider")
-        model = decision.get("model")
-        if not provider or not model:
-            return self._attach_budget_metadata(decision, context, remaining)
+        if remaining is not None and provider and model:
+            meta = self._find_catalog_meta(provider, model)
+            model_cost = float(meta.get("cost", 0.0)) if isinstance(meta, dict) else 0.0
 
-        model_meta = self.MODEL_CATALOG.get(f"{provider}:{model}")
-        if not isinstance(model_meta, dict):
-            return self._attach_budget_metadata(decision, context, remaining)
+            if model_cost > 0:
+                if model_cost > remaining:
+                    affordable = [entry for entry in self._catalog_entries() if entry["cost"] <= remaining]
+                    if affordable:
+                        fallback = min(affordable, key=lambda entry: entry["cost"])
+                        provider = fallback["provider"]
+                        model = fallback["model"]
+                        decision_out["provider"] = provider
+                        decision_out["model"] = model
+                        decision_out["reason"] = f"{decision_out.get('reason', 'policy')}_budget_downgrade"
+                        decision_out["estimated_cost"] = fallback["cost"]
+                        decision_out["estimated_latency"] = fallback["latency"]
+                        model_cost = fallback["cost"]
+                    else:
+                        decision_out["reason"] = f"{decision_out.get('reason', 'policy')}_budget_soft_overrun"
 
-        model_cost = model_meta.get("cost")
-        if model_cost is None:
-            return self._attach_budget_metadata(decision, context, remaining)
-
-        if model_cost > remaining:
-            budget_exceeded = self._budget_exceeded_decision(remaining)
-            return self._attach_budget_metadata(budget_exceeded, context, remaining)
-
-        if hasattr(context, "consume_budget"):
-            context.consume_budget(model_cost)
+                if context is not None and hasattr(context, "consume_budget"):
+                    context.consume_budget(model_cost)
 
         updated_remaining = self._budget_remaining(context)
-        return self._attach_budget_metadata(decision, context, updated_remaining)
-    
+        decision_out = self._attach_budget_metadata(decision_out, context, updated_remaining)
+
+        if ratio is not None:
+            decision_out["budget_status"] = (
+                "constrained" if ratio < 0.3 else "healthy"
+            )
+
+        return decision_out
+
     def _resolve_optimize_for(
         self,
         optimize_for: dict,
         candidates: list[dict],
         context: "ExecutionContext | None" = None,
     ) -> dict | None:
-    
         optimize_for = optimize_for or {}
-    
-        base_weights = {
+
+        weights = {
             "cost": float(optimize_for.get("cost", 0) or 0),
             "quality": float(optimize_for.get("quality", 0) or 0),
             "latency": float(optimize_for.get("latency", 0) or 0),
         }
-    
-        weights = base_weights.copy()
-    
-        # -------------------------------------------------
-        # Budget Extraction
-        # -------------------------------------------------
-        budget = context.get_budget() if context else None
-        remaining_budget = None
-        ratio = None
-    
-        if budget and budget.get("total", 0) > 0:
-            remaining_budget = budget["remaining"]
-            ratio = remaining_budget / budget["total"]
-    
-        # -------------------------------------------------
-        # Hard Stop
-        # -------------------------------------------------
-        if remaining_budget is not None and remaining_budget <= 0:
-            return {
-                "provider": "none",
-                "model": "none",
-                "reason": "budget_exceeded",
-                "budget_remaining": 0,
-                "budget_ratio": 0,
-            }
-    
-        # -------------------------------------------------
-        # Economic Mode
-        # -------------------------------------------------
-        if ratio is None:
-            mode = "balanced"
-        elif ratio < 0.3:
-            mode = "survival"
+
+        budget_ratio = self._budget_ratio(context)
+        if budget_ratio is not None and budget_ratio < 0.3:
             weights["cost"] += 0.5
             weights["quality"] *= 0.5
-        elif ratio < 0.6:
-            mode = "conservative"
+            reason = "budget_survival_mode"
+        elif budget_ratio is not None and budget_ratio < 0.6:
             weights["cost"] += 0.2
+            reason = "budget_conservative_mode"
         else:
-            mode = "balanced"
-    
-        reason = f"budget_{mode}_mode"
-    
-        # -------------------------------------------------
-        # Normalize Weights
-        # -------------------------------------------------
+            reason = "objective_multi_criteria"
+
         total_weight = sum(weights.values())
-    
         if total_weight > 0:
             weights = {
                 metric: weights.get(metric, 0) / total_weight
@@ -232,72 +212,35 @@ class ModelRouter:
             }
         else:
             weights = {metric: 0.0 for metric in self.OPTIMIZE_METRICS}
-    
-        # -------------------------------------------------
-        # Scoring Loop (Hybrid)
-        # -------------------------------------------------
+
         best_candidate = None
         best_score = None
-    
+
         for candidate in candidates:
             cost = candidate["cost"]
             latency = candidate["latency"]
             quality = candidate["quality"]
-    
+
             score = (
-                weights["cost"] * (1 / cost) +
-                weights["latency"] * (1 / latency) +
+                weights["cost"] * (1 / max(cost, 0.001)) +
+                weights["latency"] * (1 / max(latency, 0.001)) +
                 weights["quality"] * quality
             )
-    
-            # -------------------------
-            # Progressive Budget Penalty
-            # -------------------------
-            if remaining_budget is not None and cost > remaining_budget:
-            
-                if mode == "balanced":
-                    score -= cost
-    
-                elif mode == "conservative":
-                    score -= cost * 2
-    
-                elif mode == "survival":
-                    score -= cost * 5
-    
+
             if best_score is None or score > best_score:
                 best_score = score
                 best_candidate = candidate
-    
-        # -------------------------------------------------
-        # Final Decision
-        # -------------------------------------------------
+
         if best_candidate:
-            provider = best_candidate["provider"]
-            model = best_candidate["model"]
-    
-            # Consume budget
-            if context and hasattr(context, "consume_budget"):
-                context.consume_budget(best_candidate["cost"])
-    
-            updated_budget = context.get_budget() if context else budget
-            updated_ratio = None
-    
-            if updated_budget and updated_budget.get("total", 0) > 0:
-                updated_ratio = (
-                    updated_budget["remaining"] / updated_budget["total"]
-                )
-    
-            return {
-                "provider": provider,
-                "model": model,
+            decision = {
+                "provider": best_candidate["provider"],
+                "model": best_candidate["model"],
                 "reason": reason,
-                "budget_remaining": (
-                    updated_budget["remaining"] if updated_budget else None
-                ),
-                "budget_ratio": updated_ratio,
             }
-    
+            return self._finalize_decision_with_budget(decision, context)
+
         return None
+
     def _resolve_policy_entry(
         self,
         entry: dict,
@@ -319,7 +262,7 @@ class ModelRouter:
                 context=context,
             )
             if optimized_decision:
-                return self._finalize_decision_with_budget(optimized_decision, context)
+                return optimized_decision
 
         objective = decision.get("objective")
         if objective in self.OBJECTIVE_METRIC:
@@ -347,22 +290,50 @@ class ModelRouter:
         decision.setdefault("reason", default_reason)
         return self._finalize_decision_with_budget(decision, context)
 
+    def _deterministic_objective(
+        self,
+        task_type: str,
+        token_size: int,
+        routing_policy: str,
+        budget_ratio: float | None,
+    ) -> tuple[str, str]:
+        policy = (routing_policy or "balanced").strip().lower()
+
+        if policy == "fast":
+            return "fast_response", "policy_fast"
+
+        if policy == "maximum_quality":
+            return "high_quality", "policy_maximum_quality"
+
+        if budget_ratio is not None and budget_ratio < 0.3:
+            return "low_cost", "budget_constrained"
+
+        normalized_task = (task_type or "text_generation").strip().lower()
+        if normalized_task in self.COMPLEX_TASKS:
+            return "high_quality", "complex_task"
+
+        if token_size >= 2500:
+            return "high_quality", "large_context"
+
+        if normalized_task in self.SIMPLE_TASKS and token_size <= 700:
+            return "low_cost", "simple_task"
+
+        return "low_cost", "balanced_default"
+
     def resolve(
         self,
         namespace: str,
         action: str,
         posture: dict | None = None,
         context: "ExecutionContext | None" = None,
+        task_type: str | None = None,
+        token_size: int | None = None,
+        routing_policy: str | None = None,
     ) -> dict:
         posture = posture or {}
         policy = posture.get("model_policy", {}) if posture else {}
         if not isinstance(policy, dict):
             policy = {}
-
-        remaining_budget = self._budget_remaining(context)
-        if remaining_budget is not None and remaining_budget <= 0:
-            decision = self._budget_exceeded_decision(remaining_budget)
-            return self._attach_budget_metadata(decision, context, remaining_budget)
 
         candidates = self._catalog_entries()
 
@@ -379,93 +350,6 @@ class ModelRouter:
             default_reason = "strategy_wildcard_match"
 
         if rule is not None:
-            optimize_for = rule.get("optimize_for") if isinstance(rule, dict) else None
-            if isinstance(optimize_for, dict):
-                base_weights = optimize_for.copy()
-                weights = {
-                    "cost": float(base_weights.get("cost", 0) or 0),
-                    "quality": float(base_weights.get("quality", 0) or 0),
-                    "latency": float(base_weights.get("latency", 0) or 0),
-                }
-
-                budget = context.get_budget() if context else None
-                ratio = None
-                if budget and budget.get("total", 0) > 0 and remaining_budget is not None:
-                    ratio = remaining_budget / budget["total"]
-
-                mode = "balanced"
-                if ratio is not None:
-                    if ratio > 0.6:
-                        mode = "balanced"
-                    elif ratio > 0.3:
-                        mode = "conservative"
-                    else:
-                        mode = "survival"
-
-                reason = "objective_multi_criteria"
-
-                if ratio is not None:
-                    if ratio < 0.3:
-                        reason = "budget_survival_mode"
-                        weights["cost"] = weights.get("cost", 0) + 0.5
-                        weights["quality"] = weights.get("quality", 0) * 0.5
-                    elif ratio < 0.6:
-                        reason = "budget_conservative_mode"
-                        weights["cost"] = weights.get("cost", 0) + 0.2
-
-                total = sum(weights.values())
-                if total > 0:
-                    weights = {k: v / total for k, v in weights.items()}
-                else:
-                    weights = {"cost": 0.0, "quality": 0.0, "latency": 0.0}
-
-                selected_provider = None
-                selected_model = None
-                selected_model_cost = None
-                best_score = None
-
-                for candidate in candidates:
-                    cost = candidate["cost"]
-                    latency = candidate["latency"]
-                    quality = candidate["quality"]
-
-                    score = (
-                        (weights["cost"] * (1 / cost)) +
-                        (weights["latency"] * (1 / latency)) +
-                        (weights["quality"] * quality)
-                    )
-
-                    if remaining_budget is not None and cost > remaining_budget:
-                        if mode == "balanced":
-                            score -= cost
-                        elif mode == "conservative":
-                            score -= cost * 2
-                        else:
-                            score -= cost * 5
-
-                    if best_score is None or score > best_score:
-                        best_score = score
-                        selected_provider = candidate["provider"]
-                        selected_model = candidate["model"]
-                        selected_model_cost = cost
-
-                if selected_model_cost is not None and context and hasattr(context, "consume_budget"):
-                    context.consume_budget(selected_model_cost)
-                    budget = context.get_budget() if hasattr(context, "get_budget") else budget
-
-                budget_ratio = ratio
-                if budget and budget.get("total", 0) > 0:
-                    budget_ratio = budget["remaining"] / budget["total"]
-
-                decision = {
-                    "provider": selected_provider or "none",
-                    "model": selected_model or "none",
-                    "reason": reason if selected_provider else "budget_exceeded",
-                    "budget_remaining": budget["remaining"] if budget else None,
-                    "budget_ratio": budget_ratio,
-                }
-                return decision
-
             return self._resolve_policy_entry(
                 rule,
                 default_reason=default_reason,
@@ -473,4 +357,36 @@ class ModelRouter:
                 context=context,
             )
 
-        return self._finalize_decision_with_budget(self.DEFAULT_DECISION.copy(), context)
+        if task_type is None and token_size is None and routing_policy is None and context is None:
+            return self.DEFAULT_DECISION.copy()
+
+        budget_ratio = self._budget_ratio(context)
+        policy_input = routing_policy or posture.get("routing_policy") or "balanced"
+        task_input = task_type or "text_generation"
+        token_input = int(token_size or 0)
+
+        objective, reason_tag = self._deterministic_objective(
+            task_type=task_input,
+            token_size=token_input,
+            routing_policy=policy_input,
+            budget_ratio=budget_ratio,
+        )
+
+        metric = self.OBJECTIVE_METRIC.get(objective, "cost")
+        minimize = self.OBJECTIVE_MINIMIZE.get(objective, True)
+        comparator = min if minimize else max
+
+        selected = comparator(candidates, key=lambda item: item[metric]) if candidates else None
+        if selected is None:
+            return self._finalize_decision_with_budget(self.DEFAULT_DECISION.copy(), context)
+
+        decision = {
+            "provider": selected["provider"],
+            "model": selected["model"],
+            "reason": f"deterministic_{reason_tag}_{objective}",
+            "routing_policy": policy_input,
+            "task_type": task_input,
+            "token_size": token_input,
+        }
+
+        return self._finalize_decision_with_budget(decision, context)

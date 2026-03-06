@@ -32,6 +32,20 @@ class ExecutionContextTests(unittest.TestCase):
         self.assertEqual(budget["remaining"], 6.5)
         self.assertEqual(budget["spent"], 3.5)
 
+    def test_execution_trace_storage(self):
+        context = ExecutionContext()
+        context.start_pipeline(1)
+        context.log_execution_trace({
+            "task_type": "analysis",
+            "selected_model": "claude-3-opus",
+            "routing_reason": "deterministic_complex_task_high_quality",
+        })
+
+        traces = context.execution_traces()
+        self.assertEqual(len(traces), 1)
+        self.assertEqual(traces[0]["task_type"], "analysis")
+        self.assertEqual(traces[0]["selected_model"], "claude-3-opus")
+
 
 if __name__ == "__main__":
     unittest.main()

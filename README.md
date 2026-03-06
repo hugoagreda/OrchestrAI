@@ -1,154 +1,88 @@
-# OrchestrAI — Multi-Agent Identity & Automation Engine 🚀
+# OrchestrAI — AI Execution Optimization Engine
 
-## 📌 Finalidad del proyecto (explicado simple)
+OrchestrAI is a developer-facing API infrastructure that optimizes AI model execution across providers.
 
-OrchestrAI nace para que cualquier empresa pueda crear y operar agentes de IA de forma fácil, sin tener que construir flujos técnicos complejos a mano.
+The system acts as an intelligent routing and governance layer between applications and model providers to make AI usage:
 
-La idea es simple:
+- cheaper
+- easier to manage
+- provider-agnostic
+- observable and controllable
 
-- cada equipo define **qué quiere conseguir**,
-- conecta sus APIs/sistemas,
-- y OrchestrAI organiza automáticamente la ejecución usando el mejor modelo de IA para cada tarea.
+## Core Value
 
-El proyecto está pensado para **integrarse** con los sistemas internos de la empresa, no para sustituirlos por completo.
+OrchestrAI optimizes each execution based on:
 
-Además, la plataforma está orientada a un modelo **non-custodial**: por defecto no busca almacenar datos empresariales sensibles, y cada empresa mantiene la responsabilidad sobre sus datos y cumplimiento.
+- task classification
+- deterministic routing policies
+- compute budget signals
+- provider abstraction via adapters
+- structured execution traces
 
-En resumen: OrchestrAI es una capa de orquestación para convertir objetivos de negocio en ejecuciones de IA gobernadas, trazables y escalables.
+## Supported Providers (initial)
 
-## 🧠 Visión
+- OpenAI
+- Anthropic
+- Google
+- Mistral
+- OpenRouter
 
-OrchestrAI es una infraestructura multiagente diseñada para orquestar modelos de inteligencia artificial, agentes especializados y pipelines automatizados con el objetivo de construir **entidades digitales personalizables** y sistemas autónomos adaptados a empresas.
+Future support:
 
-Este proyecto **no está enfocado únicamente a crear influencers o personajes**, sino a desarrollar un **motor técnico modular** capaz de:
+- local models
+- enterprise/private endpoints
+- self-hosted models
 
-- Orquestar múltiples agentes y modelos IA.
-- Construir identidades digitales desde cero (realistas, estilizadas o corporativas).
-- Automatizar flujos de contenido y comunicación.
-- Adaptarse a diferentes sectores empresariales mediante configuraciones personalizadas.
-- Servir como base para soluciones B2C (laboratorio propio) y B2B (infraestructura para empresas).
+## Architectural Layers
 
----
+- Identity
+- Behavior
+- Strategy
+- Workflow
+- ExecutionLayer
+- CapabilityKernel
+- CapabilityNamespace
+- ExecutionContext
 
-## 🎯 Objetivos del Proyecto
+Routing and execution governance live inside `CapabilityKernel`.
 
-### 1️⃣ Infraestructura Multiagente
+## Minimal Runtime Flow
 
-Diseñar un sistema distribuido donde distintos agentes colaboren dentro de un flujo estructurado:
+Application → OrchestrAI API → Task Classifier → Routing Engine → Policy/Budget Evaluation → Model Adapter → Model Provider → Execution Trace
 
-- **Strategist Agent** → define objetivos y narrativa.
-- **Behavior Agent** → interpreta directrices del usuario o empresa.
-- **Media Agent** → genera imagen, vídeo o audio.
-- **Editor Agent** → adapta formato y coherencia visual.
-- **Publishing Agent** → automatiza acciones y despliegue.
-- **Analytics Agent** → analiza métricas y alimenta el feedback loop.
+## Development Philosophy
 
-El sistema no impone un tipo de identidad específica: cada usuario o empresa define sus propias reglas.
+Early versions prioritize:
 
----
+- simplicity
+- modularity
+- traceability
+- low operational complexity
 
-### 2️⃣ Casos de Uso
+Avoid over-engineering. Validate value first through automatic model routing and cost optimization.
 
-#### 🔵 Laboratorio interno (B2C)
+## Python Environment (venv)
 
-Espacio experimental para validar:
+Recommended setup (Windows):
 
-- pipelines multiagente
-- coherencia narrativa
-- evolución de identidades digitales
+1. Create virtual environment:
+  - `py -m venv .venv`
 
-Funciona como prueba pública del motor OrchestrAI.
+2. Activate it:
+  - PowerShell: `.\.venv\Scripts\Activate.ps1`
+  - CMD: `.venv\Scripts\activate.bat`
 
-#### 🟣 Infraestructura empresarial (B2B)
+3. Install dependencies:
+  - `python -m pip install --upgrade pip`
+  - `python -m pip install -r requirements.txt`
 
-Sistema adaptable que permite a empresas:
+4. Deactivate when done:
+  - `deactivate`
 
-- diseñar entidades digitales personalizadas
-- definir comportamiento y objetivos
-- automatizar comunicación y contenido
 
-El foco no es solo marketing; el sistema busca adaptarse a múltiples industrias.
-
----
-
-### 3️⃣ Filosofía Técnica
-
-OrchestrAI no pretende reemplazar programadores.
-
-Busca redefinir el rol técnico hacia:
-
-- Arquitectura de sistemas IA
-- Orquestación modular
-- Supervisión humana constante
-- Diseño responsable de identidades digitales
-
-Todo output generado por IA debe pasar por pipelines estructurados y revisables.
-
----
-
-## ⚙️ Arquitectura (alto nivel)
-
-Orquestador central:
-
-- n8n + API backend modular
-
-Flujo base:
-
-- Entity → Planner → Strategy → Workflow → ExecutionLayer → CapabilityKernel → ExecutionContext
-
----
-
-## Capability Manifest Schema (v1)
-
-Cada namespace de capacidad debe incluir un archivo `capability.yaml` con este contrato mínimo:
-
-```yaml
-namespace: content
-version: "1.0.0"
-description: "Descripción de la capacidad"
-
-actions:
-	action_name:
-		description: "Qué hace la acción"
-		handler: "module_name.function_name"
-		required_payload: []
-		provides_context: []
-
-governance:
-	isolation_level: "high|medium|low"
-	allow_external_calls: true
-```
-
-### Reglas validadas por el Kernel
-
-- `namespace` debe ser `string` no vacío.
-- `actions` debe ser `map` no vacío.
-- Cada acción debe definir `handler` con formato `module.function`.
-- `required_payload` debe ser lista.
-
-Si un manifiesto no cumple este contrato, el Kernel falla en boot con excepción de validación.
-
-### Capabilities disponibles actualmente
-
-- `content`
-- `media`
-- `publishing`
-- `analytics`
-
-### Ejecución de pruebas
+## Local Execution
 
 - Runtime smoke test:
-	- `python -m core.test_run`
+  - `python -m core.test_run`
 - Unit tests:
-	- `python -m unittest discover -s core/tests -p "test_*.py"`
-
-### Priority 3 Runtime Features
-
-- Handler cache metrics expuestas por Kernel:
-	- `hits`, `misses`, `size`
-- Ruta async-ready en Execution Layer y Kernel:
-	- `ExecutionLayer.execute_async(...)`
-	- `CapabilityKernel.execute_async(...)`
-- Profiling opcional por ejecución:
-	- `enable_profiling=True`
-	- métricas: `pipeline_duration_ms`, `avg_step_duration_ms`, `slowest_step`
+  - `python -m unittest discover -s core/tests -p "test_*.py"`

@@ -3,6 +3,8 @@ import inspect
 import yaml
 from pathlib import Path
 from .model_router import ModelRouter
+from .task_classifier import TaskClassifier
+from .model_adapters import ModelAdapterRegistry
 
 
 class CapabilityKernelError(Exception):
@@ -54,6 +56,8 @@ class CapabilityKernel:
         self.base_path = Path("core/action")
         self._boot_sequence()
         self.model_router = ModelRouter()
+        self.task_classifier = TaskClassifier()
+        self.adapter_registry = ModelAdapterRegistry()
 
     # ------------------------------------------------------------------
     # Cache Telemetry
@@ -196,15 +200,40 @@ class CapabilityKernel:
         self._validate_payload(step, manifest)
 
         posture = context.get_posture() or {}
+        classification = self.task_classifier.classify(step)
+        routing_policy = posture.get("routing_policy", "balanced")
 
         model_decision = self.model_router.resolve(
             namespace=step.capability,
             action=step.action,
             posture=posture,
             context=context,
+            task_type=classification.get("task_type"),
+            token_size=classification.get("token_estimate"),
+            routing_policy=routing_policy,
         )
 
+        adapter = self.adapter_registry.get(model_decision.get("provider"))
+        adapter_request = adapter.prepare_request(step, model_decision)
+
         context.log_model_decision(model_decision)
+        context.log_execution_trace({
+            "capability": step.capability,
+            "action": step.action,
+            "task_type": classification.get("task_type"),
+            "classification_confidence": classification.get("confidence"),
+            "token_size": classification.get("token_estimate"),
+            "routing_policy": routing_policy,
+            "selected_provider": model_decision.get("provider"),
+            "selected_model": model_decision.get("model"),
+            "routing_reason": model_decision.get("reason"),
+            "estimated_cost": model_decision.get("estimated_cost"),
+            "estimated_latency": model_decision.get("estimated_latency"),
+            "budget_remaining": model_decision.get("budget_remaining"),
+            "budget_ratio": model_decision.get("budget_ratio"),
+            "adapter": adapter.__class__.__name__,
+            "adapter_provider": adapter_request.get("provider"),
+        })
 
         self._run_lifecycle_hook(handler, "on_start", step, context)
 
@@ -230,15 +259,40 @@ class CapabilityKernel:
         self._validate_payload(step, manifest)
 
         posture = context.get_posture() or {}
+        classification = self.task_classifier.classify(step)
+        routing_policy = posture.get("routing_policy", "balanced")
 
         model_decision = self.model_router.resolve(
             namespace=step.capability,
             action=step.action,
             posture=posture,
             context=context,
+            task_type=classification.get("task_type"),
+            token_size=classification.get("token_estimate"),
+            routing_policy=routing_policy,
         )
 
+        adapter = self.adapter_registry.get(model_decision.get("provider"))
+        adapter_request = adapter.prepare_request(step, model_decision)
+
         context.log_model_decision(model_decision)
+        context.log_execution_trace({
+            "capability": step.capability,
+            "action": step.action,
+            "task_type": classification.get("task_type"),
+            "classification_confidence": classification.get("confidence"),
+            "token_size": classification.get("token_estimate"),
+            "routing_policy": routing_policy,
+            "selected_provider": model_decision.get("provider"),
+            "selected_model": model_decision.get("model"),
+            "routing_reason": model_decision.get("reason"),
+            "estimated_cost": model_decision.get("estimated_cost"),
+            "estimated_latency": model_decision.get("estimated_latency"),
+            "budget_remaining": model_decision.get("budget_remaining"),
+            "budget_ratio": model_decision.get("budget_ratio"),
+            "adapter": adapter.__class__.__name__,
+            "adapter_provider": adapter_request.get("provider"),
+        })
 
         self._run_lifecycle_hook(handler, "on_start", step, context)
 

@@ -22,6 +22,7 @@ class ExecutionContext:
             "artifacts": {},
             "runtime": {},
             "model_decisions": [],
+            "execution_traces": [],
             "metrics": {
                 "total_steps": 0,
                 "successful_steps": 0,
@@ -129,12 +130,21 @@ class ExecutionContext:
     def model_decisions(self):
         return list(self._state["model_decisions"])
 
+    def log_execution_trace(self, trace: dict):
+        payload = trace or {}
+        self._state["execution_traces"].append(payload)
+        self._log_event("EXECUTION_TRACE_LOGGED", {"trace": payload})
+
+    def execution_traces(self):
+        return list(self._state["execution_traces"])
+
     # =====================================================
     # METRICS
     # =====================================================
 
     def start_pipeline(self, total_steps: int, profiling_enabled: bool = False):
         metrics = self._state["metrics"]
+        self._state["execution_traces"] = []
         metrics["total_steps"] = total_steps
         metrics["successful_steps"] = 0
         metrics["failed_steps"] = 0

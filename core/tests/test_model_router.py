@@ -170,11 +170,47 @@ class ModelRouterObjectivePolicyTests(unittest.TestCase):
             context=context,
         )
 
-        self.assertEqual(decision["provider"], "none")
-        self.assertEqual(decision["model"], "none")
-        self.assertEqual(decision["reason"], "budget_exceeded")
-        self.assertEqual(decision["budget_remaining"], 0.5)
-        self.assertEqual(decision["budget_ratio"], 1.0)
+        self.assertEqual(decision["provider"], "openai")
+        self.assertEqual(decision["model"], "gpt-4o-mini")
+        self.assertIn("budget_soft_overrun", decision["reason"])
+        self.assertEqual(decision["budget_remaining"], 0.0)
+        self.assertEqual(decision["budget_ratio"], 0.0)
+
+    def test_deterministic_signals_route_to_max_quality_for_complex_task(self):
+        context = ExecutionContext()
+        context.set_budget(20.0)
+
+        decision = self.router.resolve(
+            "content",
+            "generate_script",
+            posture={},
+            context=context,
+            task_type="analysis",
+            token_size=3200,
+            routing_policy="balanced",
+        )
+
+        self.assertEqual(decision["provider"], "anthropic")
+        self.assertEqual(decision["model"], "claude-3-opus")
+        self.assertIn("high_quality", decision["reason"])
+
+    def test_deterministic_signals_route_to_fast_policy(self):
+        context = ExecutionContext()
+        context.set_budget(20.0)
+
+        decision = self.router.resolve(
+            "content",
+            "generate_script",
+            posture={},
+            context=context,
+            task_type="text_generation",
+            token_size=500,
+            routing_policy="fast",
+        )
+
+        self.assertEqual(decision["provider"], "openai")
+        self.assertEqual(decision["model"], "gpt-4o-mini")
+        self.assertIn("fast_response", decision["reason"])
 
     def test_optimize_for_uses_conservative_reason_when_budget_mid_ratio(self):
         context = ExecutionContext()
@@ -200,7 +236,7 @@ class ModelRouterObjectivePolicyTests(unittest.TestCase):
             context=context,
         )
 
-        self.assertEqual(decision["reason"], "budget_conservative_mode")
+        self.assertIn("budget_conservative_mode", decision["reason"])
         self.assertIn("budget_ratio", decision)
         self.assertLess(decision["budget_ratio"], 0.5)
 

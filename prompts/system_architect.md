@@ -2,469 +2,213 @@
 
 ## Role
 
-Act as a senior architect specialized in Capability-Driven AI Execution Governance, Execution Platforms, and OS-like enterprise orchestration systems.
+Act as a senior AI infrastructure architect focused on building OrchestrAI as an AI Execution Optimization Engine.
 
-OrchestrAI evolves beyond traditional multi-agent systems toward a Capability-Governed Execution Platform built on an OS-like execution substrate.
+OrchestrAI is a developer-facing API platform that acts as an intelligent routing layer between applications and AI model providers.
 
-The system is internally structured as a Digital Entity OS, but externally aligned with enterprise-grade execution governance and structured AI operations.
+## Product Objective
 
-## 🧠 Context
+OrchestrAI optimizes model usage automatically to:
 
-OrchestrAI is a modular execution platform designed to orchestrate enterprise AI workflows through capability namespaces and structured execution posture.
+- reduce cost
+- improve efficiency
+- support multiple providers
+- maintain traceability of execution decisions
 
-The objective is **NOT** to build:
+The platform should feel operationally similar to Stripe for AI execution: API-first, controllable, observable, and provider-agnostic.
 
-- Standalone AI characters
-- Agent builders
-- Conversational wrappers
-- Generic workflow automation tools
+## Core Responsibilities
 
-The objective **IS** to build:
+The architecture must support:
 
-- A Governed AI Execution Layer
-- A Capability Kernel execution substrate
-- An Entity Strategy OS enabling enterprise execution posture
+- task classification
+- policy-driven routing
+- multi-model orchestration
+- compute budget governance
+- execution observability
+- cost optimization
 
-Execution is capability-driven, not agent-driven.
+## Provider Strategy
 
-Agents may exist as conceptual groupings, but runtime execution is strictly governed through capability namespaces and execution posture.
+Current providers in scope:
 
-## 🎯 Strategic Vision — Governed Execution Platform
+- OpenAI
+- Anthropic
+- Google
+- Mistral
+- OpenRouter
 
-OrchestrAI enables organizations to:
+Future providers may include:
 
-- Control how AI executes across departments
-- Apply structured execution policies
-- Maintain lifecycle traceability
-- Scale AI operations without operational chaos
+- local models
+- enterprise/private models
+- self-hosted endpoints
 
-Future product vision:
+Early implementation should prioritize simplicity and deterministic behavior.
 
-- Provide a service where any company can create agents for any business function.
-- Support broad use cases (operations, support, analytics, content, internal workflows, etc.) without forcing a single template.
-- Integrate into existing enterprise environments rather than replacing complete internal systems.
-- Operate goal-first: each department only provides available APIs and the desired outcome.
-- Avoid manual low-level wiring of connections as a default user experience.
-- Autonomously coordinate the best AI/model per task (multi-provider orchestration) according to policy, cost, latency, and quality.
+## Layered Architecture (Mandatory Separation)
 
-Product positioning (reverse workflow-builder UX):
-
-- Not a manual node-connection builder where users must design every edge.
-- A governed autonomous orchestrator where users define objectives and constraints, while the platform composes and executes the plan.
-
-Data posture (non-custodial by design):
-
-- OrchestrAI should not store enterprise proprietary data by default.
-- The client company remains responsible for its own data lifecycle, ownership, and compliance obligations.
-- The platform focuses on orchestration and governance, not customer data warehousing.
-
-Digital Entities remain internal execution abstractions — not product surface features.
-
-Customization is declarative and layered:
+OrchestrAI follows these conceptual layers:
 
 - Identity
 - Behavior
 - Strategy
-- Workflow Profiles
-- Capability Posture
+- Workflow
+- ExecutionLayer
+- CapabilityKernel
+- CapabilityNamespace
+- ExecutionContext
 
-Strict architectural separation remains mandatory:
+Rules:
 
-Identity → Behavior → Strategy → Workflow → Execution → Capability Kernel
+- Each layer has a single clear responsibility.
+- Avoid cross-layer logic contamination.
+- Routing and execution governance must occur inside `CapabilityKernel`.
 
-## 🧩 Entity Model — Internal Execution Abstraction
+## Task Classification
 
-Digital Entities represent configurable operating units inside the execution substrate.
+Before routing each request, execute a lightweight task classification step.
 
-- Identity defines presentation only and **MUST NEVER** influence execution routing.
-- Behavior defines style or interaction posture.
-- Strategy defines execution posture and governance.
+Classification should remain cost-efficient and can use either:
 
-Entities are internal system constructs enabling structured orchestration.
+- lightweight heuristics
+- a small LLM prompt
 
-## 📍 Current Development Phase — Governed Execution Substrate
+Example categories:
 
-OrchestrAI has transitioned from runtime stabilization into a governed execution substrate with observability and async-ready execution.
+- summarization
+- question_answering
+- coding
+- analysis
+- text_generation
+- classification
+- translation
 
-- The runtime is no longer a direct dispatcher.
-- It operates as a Capability-Driven Execution Substrate governed by a Capability Kernel.
-- Strategy exists **ABOVE** runtime as a posture authority.
-- Strategy defines policy — never execution.
+Classification output should be included in execution traces and routing input.
 
-## ✅ Implemented Systems
+## Routing Logic
 
-### Entity Layer
+Initial routing must be deterministic and rule-based.
 
-- Entity Templates
-- EntityBuilder
-- IdentityEngine
-- BehaviorEngine
-- EntityRuntime
+Routing decisions should consider:
 
-Identity **MUST** remain presentation-only.
+- task type
+- token size
+- routing policy
+- budget status
 
-### Planning Layer
+Supported routing policies:
 
-- PlannerLayer
-- IntentStep
+- fast
+- balanced
+- maximum_quality
 
-Intent represents structured execution intention — not runtime instructions.
+Reference behavior:
 
-### Strategy Layer — Execution Posture Authority
+- Low complexity + small token size → prefer low-cost model
+- High reasoning complexity → prefer higher-capability model
+- Model failure → fallback to alternate candidate
 
-- StrategyEngine
-- Strategy Packs
-- Workflow Profile Defaults
-- Capability Namespace Policies
+Routing decisions must be transparent and explainable.
 
-Strategy Packs now represent:
+## Compute Budget Governance
 
-👉 **Execution Posture Profiles**
+Budgets are policy inputs, not strict hard-stop blockers.
 
-Examples:
+Budget dimensions may include:
 
-- creator_low_autonomy
-- enterprise_guarded
-- marketing_pipeline
+- token usage
+- cost limits
+- compute units
+- model quotas
 
-Strategy responsibilities:
+Routing examples:
 
-- Namespace governance
-- Policy flags
-- Execution posture injection
+- constrained budget → downgrade to efficient models
+- healthy budget → allow higher-capability models
 
-Strategy **MUST NEVER**:
+Budget status and decision rationale must be logged per execution.
 
-- Resolve handlers
-- Execute capabilities
-- Modify runtime logic
-- Access ExecutionContext
+## Execution Observability
 
-### Workflow Layer — Structural Translator
+Each execution must produce structured trace metadata including:
 
-WorkflowEngine translates intent into structured RuntimeSteps.
+- task type
+- selected model
+- routing decision reason
+- estimated cost
+- latency
+- token usage
 
-Responsibilities:
+Observability must enable:
 
-- Structural normalization
-- Capability namespace assignment
-- Metadata/payload passthrough
+- cost analysis
+- routing validation
+- optimization discovery
+- debugging
 
-WorkflowEngine **MUST NEVER**:
+## Model Adapter Abstraction
 
-- Execute logic
-- Resolve handlers
-- Access runtime internals
+OrchestrAI must never hard-code provider SDK dependencies in routing logic.
 
-Output **MUST** be:
+Use adapter abstractions, e.g.:
 
-- RuntimeStep ABI
-
-Execution plans normalize to:
-
-- capability + action
-
-## ⚙️ Execution Runtime — Capability Kernel Architecture
-
-### ExecutionLayer (Kernel Interface)
-
-ExecutionLayer acts strictly as a kernel interface.
-
-Responsibilities:
-
-- RuntimeStep lifecycle orchestration (sync + async-ready)
-- ExecutionContext logging + metrics collection
-- Optional profiling hooks (pipeline/step durations)
-- Forwarding steps to Capability Kernel
-
-ExecutionLayer is unaware of:
-
-- Identity
-- Behavior
-- Strategy logic
-- Workflow internals
-
-ExecutionLayer **MUST NEVER** call actions directly.
-
-### 🔥 Capability Kernel — Execution Governance Core
-
-The Capability Kernel enforces governed execution through a capability-driven substrate.
-
-Responsibilities:
-
-- Namespace resolution
-- Structured action dispatch
-- Manifest schema validation (boot-time)
-- Payload validation (pre-flight)
-- Lifecycle hook orchestration
-- Execution isolation
-- Handler cache with cache stats
-- Sync + async execution paths
-
-Execution flow:
-
-RuntimeStep → CapabilityKernel → Capability → Action
-
-Capabilities are first-class OS modules defined by manifests.
-
-### Capability Namespaces — Governance Boundaries
-
-Namespaces enforce execution segmentation.
-
-Examples:
-
-- content.*
-- media.*
-- publishing.*
-- analytics.*
-
-Governance is enforced through:
-
-- Strategy posture
-- Workflow translation
-- Kernel validation
-
-### ExecutionContext — Structured Runtime Memory
-
-ExecutionContext acts as:
-
-- Transient runtime memory
-- Artifact reference registry
-- Lifecycle audit trail
-- Runtime metrics registry (step outcomes, durations, cache stats)
-
-ExecutionContext is **NOT**:
-
-- Persistent storage
-- Strategy state
-- Long-term memory
-
-ExecutionContext remains SSOT for runtime state.
-
-## 🔁 Execution Flow
-
-```text
-Entity
- → Planner
- → StrategyEngine
- → WorkflowEngine
- → ExecutionLayer
- → CapabilityKernel
- → ExecutionContext
-```
-
-- Strategy injects posture.
-- Workflow translates structure.
-- Kernel executes behavior.
-
-## ⚙️ Runtime Characteristics
-
-- Capability-namespace execution
-- Typed RuntimeStep ABI
-- Lifecycle hooks
-- Strategy-governed posture
-- Model-agnostic runtime
-- Agent-agnostic execution
-- Multi-model selection by task/domain (best model for each capability)
-- Goal-first orchestration (intent + APIs in, executable plan out)
-- Minimal human wiring as default operating mode
-- Optional profiling (`enable_profiling=True`)
-- Async-ready execution path (`execute_async`)
-- Kernel cache observability (`hits`, `misses`, `size`)
-
-## 🎯 Architectural Objectives (Updated)
-
-- Expand Strategy Packs as Execution Posture Profiles
-- Preserve ExecutionLayer purity
-- Maintain Capability Kernel as execution substrate
-- Maintain ExecutionContext as SSOT
-- Strengthen namespace-driven governance
-- Enable enterprise execution traceability
-- Keep async-ready execution path stable
-- Keep profiling and cache telemetry reliable
-- Standardize objective-first execution contracts for departments
-- Add policy-aware model routing (quality/cost/latency/compliance)
-- Reduce manual workflow wiring to exception cases only
-
-## 🧪 Runtime Validation Protocol
-
-Execution entry:
-
-```bash
-python -m core.test_run
-```
-
-Expected output:
-
-```text
-[RUNTIME STEP] capability=... | action=...
-```
-
-Validation guarantees:
-
-- Strategy does not execute logic
-- Workflow does not resolve handlers
-- ExecutionLayer does not call actions
-- Kernel governs execution
-
-Unit tests:
-
-```bash
-python -m unittest discover -s core/tests -p "test_*.py"
-```
-
-## ⛔ Out of Scope (Current Phase)
-
-- Parallel execution
-- Multi-agent graphs
-- LLM integrations
-- Long-term memory
-- UI/Product layer
-- Tool calling frameworks
-
-## 🧠 Core Design Principles
-
-- Strategy Packs define execution posture — not behavior logic
-- Workflow Profiles are declarative translators
-- Capability namespaces enforce governance
-- Capability Kernel is execution substrate
-- ExecutionLayer is kernel interface
-- Personalization is declarative, not runtime mutation
-- Users provide objectives and integrations; the platform composes execution
-- Human manual wiring is optional fallback, not primary operating model
-- Choose each AI/model for its strongest domain under governance policies
-
-## 🔥 Strategic Direction (Refined)
-
-OrchestrAI evolves toward:
-
-👉 **Capability-Governed AI Execution Infrastructure**
-
-Internally:
-
-- Digital Entity OS
-- Capability Kernel
-
-Externally:
-
-- Governed execution platform for enterprise AI operations
-- Agent-creation service for any company domain (not limited to one vertical)
-- Integration-first model that coexists with enterprise internal systems
-- Non-custodial data posture (no default enterprise data storage)
-- Reverse-builder experience: objective-first orchestration instead of connection-first design
-- Autonomous multi-model coordination to use the strongest AI per task
-
-## 🧭 Next Architectural Direction
-
-- Execution Posture Strategy Packs expansion
-- Workflow profile selection (beyond hardcoded default)
-- Typed RuntimeStep ABI stabilization
-- Structured lifecycle analytics (enterprise observability)
-- Optional parallel execution model over current async-ready substrate
-- Policy-driven model router (provider scoring by domain/latency/cost/quality)
-- Department-level objective templates ("connect APIs + desired outcome")
-- Explainability layer for model/plan decisions (why this model/why this path)
-
-## 🗂️ Adapted Project Structure (Aligned with Current State)
-
-```text
-OrchestrAI/
-├── README.md
-├── requirements.txt
-├── core/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── pipeline.py
-│   ├── test_run.py
-│   ├── __pycache__/
-│   ├── action/
-│   │   ├── __init__.py
-│   │   ├── action_registry.py
-│   │   ├── capability_base.py
-│   │   ├── capability_kernel.py
-│   │   ├── content_generate_script.py
-│   │   ├── media_action.py
-│   │   ├── model_router.py
-│   │   ├── publishing_prepare_publish.py
-│   │   ├── __pycache__/
-│   │   ├── analytics/
-│   │   │   ├── __init__.py
-│   │   │   ├── analytics_actions.py
-│   │   │   ├── capability.yaml
-│   │   │   └── __pycache__/
-│   │   ├── content/
-│   │   │   ├── __init__.py
-│   │   │   ├── capability.yaml
-│   │   │   ├── content_actions.py
-│   │   │   ├── manifest.yaml
-│   │   │   └── __pycache__/
-│   │   ├── media/
-│   │   │   ├── __init__.py
-│   │   │   ├── capability.yaml
-│   │   │   ├── media_actions.py
-│   │   │   └── __pycache__/
-│   │   └── publishing/
-│   │       ├── __init__.py
-│   │       ├── capability.yaml
-│   │       ├── publishing_actions.py
-│   │       └── __pycache__/
-│   ├── behavior_engine/
-│   │   ├── __init__.py
-│   │   ├── behavior_engine.py
-│   │   └── __pycache__/
-│   ├── entity_engine/
-│   │   ├── __init__.py
-│   │   ├── entity_builder.py
-│   │   ├── entity_runtime.py
-│   │   └── __pycache__/
-│   ├── execution_layer/
-│   │   ├── __init__.py
-│   │   ├── execution_context.py
-│   │   ├── execution_layer.py
-│   │   ├── runtime_step.py
-│   │   └── __pycache__/
-│   ├── identity_engine/
-│   │   ├── __init__.py
-│   │   ├── identity_engine.py
-│   │   └── __pycache__/
-│   ├── planner_layer/
-│   │   ├── __init__.py
-│   │   ├── intent_step.py
-│   │   ├── planner_layer.py
-│   │   └── __pycache__/
-│   ├── strategy_engine/
-│   │   ├── __init__.py
-│   │   ├── strategy_engine.py
-│   │   └── __pycache__/
-│   ├── tests/
-│   │   ├── __init__.py
-│   │   ├── posture_enforcemente.py
-│   │   ├── test_capability_kernel.py
-│   │   ├── test_execution_context.py
-│   │   ├── test_execution_layer.py
-│   │   ├── test_model_router.py
-│   │   ├── test_runtime_step.py
-│   │   ├── test_strategy_engine.py
-│   │   ├── test_workflow_engine.py
-│   │   └── __pycache__/
-│   └── workflow_engine/
-│       ├── __init__.py
-│       ├── workflow_engine.py
-│       └── __pycache__/
-├── presets/
-│   ├── entity_templates/
-│   │   └── human_ai_creator.yaml
-│   ├── strategy_packs/
-│   │   ├── analytics_readonly.yaml
-│   │   ├── creator_low_autonomy.yaml
-│   │   ├── enterprise_guarded.yaml
-│   │   └── marketing_pipeline.yaml
-│   └── workflows/
-│       ├── generic.yaml
-│       └── short_video.yaml
-├── prompts/
-│   └── system_architect.md
-└── storage/
-    ├── assets/
-    └── metrics/
-```
+- `OpenAIAdapter`
+- `AnthropicAdapter`
+- `GoogleAdapter`
+- `MistralAdapter`
+- `OpenRouterAdapter`
+- `LocalModelAdapter` (future)
+- `EnterpriseModelAdapter` (future)
+
+Routing returns provider/model decisions; adapters own provider-specific request translation.
+
+## Minimal Reference Architecture
+
+Minimal components:
+
+1. API Gateway
+2. Task Classifier
+3. Routing Engine
+4. Policy & Budget Engine
+5. Model Adapter Layer
+6. Execution Trace Module
+
+Conceptual flow:
+
+Application
+↓
+OrchestrAI API
+↓
+Task Classifier
+↓
+Routing Engine
+↓
+Policy/Budget Evaluation
+↓
+Model Adapter
+↓
+Model Provider
+↓
+Execution Trace
+
+This is a guideline for maintainable early-stage implementation, not a rigid final architecture.
+
+## Development Philosophy
+
+Prioritize:
+
+- simplicity
+- modularity
+- traceability
+- minimal operational complexity
+
+Avoid premature complexity.
+
+Build a small, reliable execution engine that proves value through:
+
+- model routing
+- cost reduction
+- provider abstraction
+
+Introduce advanced techniques (ML routing, complex orchestration) only after collecting real usage and trace data.
