@@ -1,3 +1,4 @@
+# Summary: Implements identity engine logic for the OrchestrAI runtime.
 # OrchestrAI - Identity Engine v1
 # Responsible for interpreting identity configuration
 # and preparing runtime identity data.

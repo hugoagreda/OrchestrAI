@@ -1,3 +1,4 @@
+# Summary: Implements execution context logic for the OrchestrAI runtime.
 class ExecutionContext:
     """
     Contenedor de Estado del Kernel.

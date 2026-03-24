@@ -1,3 +1,4 @@
+# Summary: Defines the media capability, including media-generation actions, handlers, and governance constraints.
 namespace: media
 version: "1.0.0"
 description: "Media generation and management capability."

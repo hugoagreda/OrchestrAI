@@ -1,3 +1,4 @@
+# Summary: Implements model adapters logic for the OrchestrAI runtime.
 class BaseModelAdapter:
     provider = "base"
 

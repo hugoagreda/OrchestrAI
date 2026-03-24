@@ -1,3 +1,4 @@
+<!-- Summary: Provides project overview, setup steps, and usage instructions for OrchestrAI. -->
 # OrchestrAI — AI Execution Optimization API
 
 OrchestrAI es una API que reduce automáticamente el coste de usar modelos de inteligencia artificial seleccionando el modelo óptimo para cada petición.

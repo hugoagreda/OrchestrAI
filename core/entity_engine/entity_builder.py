@@ -1,3 +1,4 @@
+# Summary: Implements entity builder logic for the OrchestrAI runtime.
 # OrchestrAI - Entity Builder v1
 # Loads entity templates and builds base entity definitions.
 

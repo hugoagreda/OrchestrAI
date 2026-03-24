@@ -1,3 +1,4 @@
+# Summary: Implements planner layer logic for the OrchestrAI runtime.
 # Responsible for interpreting runtime entity configuration
 # and generating a structured high-level action plan (IntentStep).
 

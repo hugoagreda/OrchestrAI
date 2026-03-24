@@ -1,3 +1,4 @@
+# Summary: Defines the content capability, including script-generation actions, handlers, required payloads, and governance.
 namespace: content
 version: "1.1.0"
 description: "Content generation and script management capability."

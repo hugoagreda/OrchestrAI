@@ -1,3 +1,4 @@
+# Summary: Implements content actions logic for the OrchestrAI runtime.
 """
 Content Capability Actions — Script generation and refinement
 """

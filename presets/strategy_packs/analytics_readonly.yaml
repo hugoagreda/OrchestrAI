@@ -1,3 +1,4 @@
+# Summary: Defines reusable preset configuration used by OrchestrAI entities, strategies, or workflows.
 name: analytics_readonly
 version: 1.0.0
 

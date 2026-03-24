@@ -1,3 +1,4 @@
+# Summary: Implements behavior engine logic for the OrchestrAI runtime.
 # Responsible for interpreting entity behavior configuration
 # and enriching IntentStep without executing logic.
 

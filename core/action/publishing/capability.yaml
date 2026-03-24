@@ -1,3 +1,4 @@
+# Summary: Defines the publishing capability, including publication-preparation actions, handlers, and governance policy.
 namespace: publishing
 version: "1.0.0"
 description: "Content publishing and distribution capability."

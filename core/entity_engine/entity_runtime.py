@@ -1,3 +1,4 @@
+# Summary: Implements entity runtime logic for the OrchestrAI runtime.
 # OrchestrAI - Entity Runtime v1
 # Combines identity and behavior into a runtime-ready entity.
 

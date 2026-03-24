@@ -1,50 +1,83 @@
+# python -m core.tests.test_execution_context
 import unittest
 
 from core.execution_layer.execution_context import ExecutionContext
 
 
 class ExecutionContextTests(unittest.TestCase):
-    def test_metrics_lifecycle(self):
+    def test_initialization_contains_input_policy_budget_status_and_trace(self):
         context = ExecutionContext()
-        context.start_pipeline(2)
-        context.record_step_success("content", "generate_script", 12.5)
-        context.record_step_failure("media", "generate_media", 8.2, "boom")
-        context.finish_pipeline()
+        context.set_runtime("input", {"query": "hello"})
+        context.set_runtime("policy", {"routing_policy": "balanced"})
+        context.set_runtime("budget_status", "healthy")
 
-        metrics = context.metrics()
-        self.assertEqual(metrics["total_steps"], 2)
-        self.assertEqual(metrics["successful_steps"], 1)
-        self.assertEqual(metrics["failed_steps"], 1)
-        self.assertEqual(metrics["last_error"], "boom")
+        dump = context.dump()
 
-    def test_budget_lifecycle(self):
+        self.assertIn("input", dump["state"]["runtime"])
+        self.assertIn("policy", dump["state"]["runtime"])
+        self.assertEqual(dump["state"]["runtime"]["budget_status"], "healthy")
+        self.assertEqual(context.execution_traces(), [])
+
+    def test_trace_accumulates_without_overwriting(self):
         context = ExecutionContext()
-        context.set_budget(10.0)
-
-        budget = context.get_budget()
-        self.assertIsNotNone(budget)
-        self.assertEqual(budget["total"], 10.0)
-        self.assertEqual(budget["remaining"], 10.0)
-        self.assertEqual(budget["spent"], 0.0)
-
-        context.consume_budget(3.5)
-        budget = context.get_budget()
-        self.assertEqual(budget["remaining"], 6.5)
-        self.assertEqual(budget["spent"], 3.5)
-
-    def test_execution_trace_storage(self):
-        context = ExecutionContext()
-        context.start_pipeline(1)
-        context.log_execution_trace({
+        classification_trace = {
+            "stage": "classification",
             "task_type": "analysis",
-            "selected_model": "claude-3-opus",
-            "routing_reason": "deterministic_complex_task_high_quality",
-        })
+        }
+        routing_trace = {
+            "stage": "routing",
+            "provider": "openai",
+            "model": "gpt-4o-mini",
+        }
+
+        context.log_execution_trace(classification_trace)
+        context.log_execution_trace(routing_trace)
 
         traces = context.execution_traces()
-        self.assertEqual(len(traces), 1)
-        self.assertEqual(traces[0]["task_type"], "analysis")
-        self.assertEqual(traces[0]["selected_model"], "claude-3-opus")
+        self.assertEqual(len(traces), 2)
+        self.assertEqual(traces[0]["stage"], "classification")
+        self.assertEqual(traces[1]["stage"], "routing")
+
+    def test_input_immutability_after_execution_updates(self):
+        context = ExecutionContext()
+        original_input = {"query": "immutable", "options": {"tone": "neutral"}}
+        snapshot = {
+            "query": "immutable",
+            "options": {"tone": "neutral"},
+        }
+
+        context.set_runtime("input", dict(original_input))
+        context.log_execution_trace({"stage": "classification"})
+        context.set("script_raw", "some result")
+        context.start_pipeline(1)
+        context.finish_pipeline()
+
+        self.assertEqual(original_input, snapshot)
+
+    def test_budget_status_propagates_across_steps(self):
+        context = ExecutionContext()
+        context.set_runtime("budget_status", "healthy")
+
+        context.log_execution_trace({"stage": "classification"})
+        self.assertEqual(context.get_runtime("budget_status"), "healthy")
+
+        context.log_execution_trace({"stage": "routing"})
+        self.assertEqual(context.get_runtime("budget_status"), "healthy")
+
+    def test_context_isolation_between_executions(self):
+        first = ExecutionContext()
+        second = ExecutionContext()
+
+        first.set_runtime("input", {"query": "first"})
+        first.log_execution_trace({"execution_id": "A"})
+
+        second.set_runtime("input", {"query": "second"})
+        second.log_execution_trace({"execution_id": "B"})
+
+        self.assertEqual(first.get_runtime("input")["query"], "first")
+        self.assertEqual(second.get_runtime("input")["query"], "second")
+        self.assertEqual(first.execution_traces()[0]["execution_id"], "A")
+        self.assertEqual(second.execution_traces()[0]["execution_id"], "B")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+# Summary: Implements capability kernel logic for the OrchestrAI runtime.
 import importlib
 import inspect
 import yaml
@@ -5,6 +6,10 @@ from pathlib import Path
 from .model_router import ModelRouter
 from .task_classifier import TaskClassifier
 from .model_adapters import ModelAdapterRegistry
+from core.execution_layer.execution_trace import (
+    DEFAULT_BASELINE_MODEL,
+    compute_savings,
+)
 
 
 class CapabilityKernelError(Exception):
@@ -215,25 +220,41 @@ class CapabilityKernel:
 
         adapter = self.adapter_registry.get(model_decision.get("provider"))
         adapter_request = adapter.prepare_request(step, model_decision)
+        cost_trace = self._cost_trace(model_decision, classification, context)
 
         context.log_model_decision(model_decision)
-        context.log_execution_trace({
+        trace_payload = {
             "capability": step.capability,
             "action": step.action,
+            "classification": classification.get("task_type"),
             "task_type": classification.get("task_type"),
             "classification_confidence": classification.get("confidence"),
+            "estimated_tokens": classification.get("token_estimate"),
             "token_size": classification.get("token_estimate"),
+            "routing": {
+                "policy": routing_policy,
+                "provider": model_decision.get("provider"),
+                "model": model_decision.get("model"),
+            },
             "routing_policy": routing_policy,
             "selected_provider": model_decision.get("provider"),
-            "selected_model": model_decision.get("model"),
+            "selected_model": cost_trace.get("selected_model"),
+            "decision_reason": model_decision.get("reason"),
             "routing_reason": model_decision.get("reason"),
-            "estimated_cost": model_decision.get("estimated_cost"),
+            "estimated_cost": cost_trace.get("estimated_cost"),
+            "baseline_model": cost_trace.get("baseline_model"),
+            "baseline_cost": cost_trace.get("baseline_cost"),
+            "savings": cost_trace.get("savings"),
+            "savings_ratio": cost_trace.get("savings_ratio"),
+            "decision_flag": cost_trace.get("decision_flag"),
             "estimated_latency": model_decision.get("estimated_latency"),
             "budget_remaining": model_decision.get("budget_remaining"),
             "budget_ratio": model_decision.get("budget_ratio"),
             "adapter": adapter.__class__.__name__,
             "adapter_provider": adapter_request.get("provider"),
-        })
+        }
+        context.log_execution_trace(trace_payload)
+        print("[KERNEL TRACE]", trace_payload)
 
         self._run_lifecycle_hook(handler, "on_start", step, context)
 
@@ -274,25 +295,41 @@ class CapabilityKernel:
 
         adapter = self.adapter_registry.get(model_decision.get("provider"))
         adapter_request = adapter.prepare_request(step, model_decision)
+        cost_trace = self._cost_trace(model_decision, classification, context)
 
         context.log_model_decision(model_decision)
-        context.log_execution_trace({
+        trace_payload = {
             "capability": step.capability,
             "action": step.action,
+            "classification": classification.get("task_type"),
             "task_type": classification.get("task_type"),
             "classification_confidence": classification.get("confidence"),
+            "estimated_tokens": classification.get("token_estimate"),
             "token_size": classification.get("token_estimate"),
+            "routing": {
+                "policy": routing_policy,
+                "provider": model_decision.get("provider"),
+                "model": model_decision.get("model"),
+            },
             "routing_policy": routing_policy,
             "selected_provider": model_decision.get("provider"),
-            "selected_model": model_decision.get("model"),
+            "selected_model": cost_trace.get("selected_model"),
+            "decision_reason": model_decision.get("reason"),
             "routing_reason": model_decision.get("reason"),
-            "estimated_cost": model_decision.get("estimated_cost"),
+            "estimated_cost": cost_trace.get("estimated_cost"),
+            "baseline_model": cost_trace.get("baseline_model"),
+            "baseline_cost": cost_trace.get("baseline_cost"),
+            "savings": cost_trace.get("savings"),
+            "savings_ratio": cost_trace.get("savings_ratio"),
+            "decision_flag": cost_trace.get("decision_flag"),
             "estimated_latency": model_decision.get("estimated_latency"),
             "budget_remaining": model_decision.get("budget_remaining"),
             "budget_ratio": model_decision.get("budget_ratio"),
             "adapter": adapter.__class__.__name__,
             "adapter_provider": adapter_request.get("provider"),
-        })
+        }
+        context.log_execution_trace(trace_payload)
+        print("[KERNEL TRACE]", trace_payload)
 
         self._run_lifecycle_hook(handler, "on_start", step, context)
 
@@ -342,3 +379,39 @@ class CapabilityKernel:
                     f"El hook de ciclo de vida '{hook_name}' falló para "
                     f"{step.capability}.{step.action}: {e}"
                 ) from e
+
+    def _baseline_model(self, context) -> str:
+        if context is None or not hasattr(context, "get_runtime"):
+            return DEFAULT_BASELINE_MODEL
+
+        override = context.get_runtime("baseline_model")
+        if isinstance(override, str) and override.strip():
+            return override.strip()
+
+        return DEFAULT_BASELINE_MODEL
+
+    def _cost_trace(self, model_decision: dict, classification: dict, context) -> dict:
+        selected_model = str(model_decision.get("model") or "")
+        token_estimate = int(classification.get("token_estimate") or 0)
+        baseline_model = self._baseline_model(context)
+
+        savings_data = compute_savings(
+            selected_model=selected_model,
+            baseline_model=baseline_model,
+            tokens={
+                "input_tokens": token_estimate,
+                "output_tokens": token_estimate // 2,
+            },
+        )
+
+        trace = {
+            "selected_model": savings_data.get("selected_model"),
+            "estimated_cost": savings_data.get("estimated_cost"),
+            "baseline_model": savings_data.get("baseline_model"),
+            "baseline_cost": savings_data.get("baseline_cost"),
+            "savings": savings_data.get("savings"),
+            "savings_ratio": savings_data.get("savings_ratio"),
+            "decision_flag": savings_data.get("decision_flag"),
+        }
+        print("[KERNEL COST TRACE]", trace)
+        return trace
