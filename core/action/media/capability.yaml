@@ -4,10 +4,11 @@ description: "Media generation and management capability."
 
 actions:
   generate_media:
-    description: "Generates media assets (images, video, etc.)"
+    description: "Generates media assets (images, video, etc.)."
     handler: "media_actions.generate_media"
     required_payload: []
-    provides_context: ["media_asset"]
+    provides_context:
+      - "media_asset"
 
 governance:
   isolation_level: "high"

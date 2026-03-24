@@ -151,4 +151,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Ejecución: python -m core.test_run
+# Ejecucion: python -m core.run_demo_pipeline

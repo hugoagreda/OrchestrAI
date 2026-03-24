@@ -7,7 +7,8 @@ actions:
     description: "Prepares content for publication."
     handler: "publishing_actions.prepare_publish"
     required_payload: []
-    provides_context: ["publish_ready"]
+    provides_context:
+      - "publish_ready"
 
 governance:
   isolation_level: "medium"

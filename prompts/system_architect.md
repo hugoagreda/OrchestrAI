@@ -65,6 +65,113 @@ Rules:
 - Avoid cross-layer logic contamination.
 - Routing and execution governance must occur inside `CapabilityKernel`.
 
+## Handler Resolution Policy
+
+Handler resolution must be manifest-driven.
+
+Source of truth:
+
+- `core/action/<namespace>/capability.yaml`
+- `core/action/<namespace>/<module>.py`
+
+Manifest standard:
+
+- Use only `capability.yaml` per namespace.
+- Do not create parallel manifest files (for example, `manifest.yaml`) for action resolution.
+
+Policy:
+
+- Do not reintroduce module registries or fallback maps outside `CapabilityKernel`.
+- New actions must be declared in namespace manifests and resolved by kernel namespace loading.
+- Architectural proposals should remove legacy action-resolution layers, not expand them.
+
+## Project Tree (Current)
+
+This repository currently follows the structure below.
+
+```text
+OrchestrAI/
+├── .env.example
+├── README.md
+├── requirements.txt
+├── core/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── pipeline.py
+│   ├── run_demo_pipeline.py
+│   ├── action/
+│   │   ├── __init__.py
+│   │   ├── capability_kernel.py
+│   │   ├── model_adapters.py
+│   │   ├── model_router.py
+│   │   ├── task_classifier.py
+│   │   ├── analytics/
+│   │   │   ├── __init__.py
+│   │   │   ├── analytics_actions.py
+│   │   │   └── capability.yaml
+│   │   ├── content/
+│   │   │   ├── __init__.py
+│   │   │   ├── capability.yaml
+│   │   │   ├── content_actions.py
+│   │   ├── media/
+│   │   │   ├── __init__.py
+│   │   │   ├── capability.yaml
+│   │   │   └── media_actions.py
+│   │   └── publishing/
+│   │       ├── __init__.py
+│   │       ├── capability.yaml
+│   │       └── publishing_actions.py
+│   ├── behavior_engine/
+│   │   ├── __init__.py
+│   │   └── behavior_engine.py
+│   ├── entity_engine/
+│   │   ├── __init__.py
+│   │   ├── entity_builder.py
+│   │   └── entity_runtime.py
+│   ├── execution_layer/
+│   │   ├── __init__.py
+│   │   ├── execution_context.py
+│   │   ├── execution_layer.py
+│   │   └── runtime_step.py
+│   ├── identity_engine/
+│   │   ├── __init__.py
+│   │   └── identity_engine.py
+│   ├── planner_layer/
+│   │   ├── __init__.py
+│   │   ├── intent_step.py
+│   │   └── planner_layer.py
+│   ├── strategy_engine/
+│   │   ├── __init__.py
+│   │   └── strategy_engine.py
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   ├── test_posture_enforcement.py
+│   │   ├── test_capability_kernel.py
+│   │   ├── test_execution_context.py
+│   │   ├── test_execution_layer.py
+│   │   ├── test_model_router.py
+│   │   ├── test_runtime_step.py
+│   │   ├── test_strategy_engine.py
+│   │   ├── test_task_classifier.py
+│   │   └── test_workflow_engine.py
+│   └── workflow_engine/
+│       ├── __init__.py
+│       └── workflow_engine.py
+├── presets/
+│   ├── entity_templates/
+│   │   └── human_ai_creator.yaml
+│   ├── strategy_packs/
+│   │   ├── analytics_readonly.yaml
+│   │   ├── creator_low_autonomy.yaml
+│   │   ├── enterprise_guarded.yaml
+│   │   └── marketing_pipeline.yaml
+│   └── workflows/
+│       ├── generic.yaml
+│       └── short_video.yaml
+└── prompts/
+    └── system_architect.md
+```
+
 ## Task Classification
 
 Before routing each request, execute a lightweight task classification step.

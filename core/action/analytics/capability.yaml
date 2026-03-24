@@ -7,7 +7,8 @@ actions:
     description: "Builds a lightweight analytics summary from runtime memory."
     handler: "analytics_actions.analyze_metrics"
     required_payload: []
-    provides_context: ["analytics_summary"]
+    provides_context:
+      - "analytics_summary"
 
 governance:
   isolation_level: "medium"
